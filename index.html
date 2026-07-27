@@ -785,6 +785,93 @@
   }
   .btn-add-pres:hover { background: rgba(74,222,128,0.15); border-color: var(--accent); }
 
+
+  /* ── DASHBOARD TABS (Anual / meses) ── */
+  .dash-tab-bar {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 5px; width: 100%;
+    overflow-x: auto; flex-wrap: nowrap;
+  }
+  .dash-tab {
+    padding: 6px 12px; border-radius: 8px; border: none;
+    background: transparent; color: var(--muted);
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+  }
+  .dash-tab:hover { color: var(--text); }
+  .dash-tab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  .dash-tab.anual  { color: var(--accent2); }
+  .dash-tab.anual.active { color: var(--accent2); }
+  .dash-tab.has-data::after { content: '●'; font-size: 6px; vertical-align: super; margin-left: 3px; color: var(--accent); }
+
+  :root.light .dash-tab-bar  { background: #FFFFFF; border-color: #E2E8F0; }
+  :root.light .dash-tab.active { background: #F1F5F9; }
+
+  /* ── PANEL ANUAL ── */
+  .anual-panel { display: none; }
+  .anual-panel.active { display: block; }
+  .mes-panel { display: none; }
+  .mes-panel.active { display: block; }
+
+  /* Grid de tarjetas anuales */
+  .anual-grid-top {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px;
+  }
+  .anual-grid-mid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px;
+  }
+  .anual-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px; position: relative; overflow: hidden;
+  }
+  .anual-card::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .anual-card.green::after  { background: var(--accent); }
+  .anual-card.blue::after   { background: var(--accent2); }
+  .anual-card.pink::after   { background: var(--accent3); }
+  .anual-card.yellow::after { background: var(--warn); }
+  .anual-card.red::after    { background: var(--danger); }
+  .anual-card.teal::after   { background: #2DD4BF; }
+  :root.light .anual-card   { background: #FFFFFF; border-color: #E2E8F0; }
+
+  .anual-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .anual-val   { font-family: var(--mono); font-size: 22px; font-weight: 500; line-height: 1; }
+  .anual-sub   { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .anual-val.green  { color: var(--accent); }
+  .anual-val.blue   { color: var(--accent2); }
+  .anual-val.pink   { color: var(--accent3); }
+  .anual-val.yellow { color: var(--warn); }
+  .anual-val.red    { color: var(--danger); }
+  .anual-val.teal   { color: #2DD4BF; }
+
+  /* Tabla resumen por mes en panel anual */
+  .mes-resumen-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mes-resumen-table th {
+    text-align: right; padding: 8px 12px; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted);
+    border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);
+  }
+  .mes-resumen-table th:first-child { text-align: left; }
+  .mes-resumen-table td {
+    padding: 8px 12px; border-bottom: 1px solid rgba(42,48,80,0.3);
+    text-align: right; font-family: var(--mono); font-size: 12px;
+  }
+  .mes-resumen-table td:first-child { font-family: var(--sans); color: var(--muted); text-align: left; cursor: pointer; }
+  .mes-resumen-table td:first-child:hover { color: var(--accent); text-decoration: underline; }
+  .mes-resumen-table tr:last-child td { border-bottom: none; color: var(--accent); font-weight: 600; }
+  .mes-resumen-table tr.empty-row td { color: var(--muted); opacity: 0.4; }
+  :root.light .mes-resumen-table th { background: #F8FAFC; }
+
+  /* Dashboard mes — ganancia inversiones */
+  .inv-ganancia-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--accent);
+    font-family: var(--mono); margin-top: 8px; width: 100%;
+  }
+
   /* ── BIENES RAÍCES ── */
   .br-tabs {
     display: flex; gap: 6px; margin-bottom: 24px;
@@ -2626,7 +2713,7 @@ function calcAverages() {
 
 // ── COPIAR MES ANTERIOR ──
 function copyFromPrevMonth() {
-  if (currentMonth === 0) {
+  if (currentMonth <= 0) {
     showToast('⚠️ Enero es el primer mes — no hay mes anterior');
     return;
   }
@@ -2651,33 +2738,229 @@ function updateCopyBtn() {
   const btn = document.getElementById('btn-copy-prev');
   if (!btn) return;
   // Mostrar si no es enero
-  btn.style.display = currentMonth > 0 ? 'inline-flex' : 'none';
+  btn.style.display = currentMonth > 0 ? 'inline-flex' : 'none'; // -1 = anual, 0 = enero
   if (currentMonth > 0) {
     btn.textContent = '📋 Copiar de ' + MONTHS[currentMonth - 1].slice(0,3);
   }
 }
 
+
+// ═══════════════════════════════════════════
+// DASHBOARD ANUAL
+// ═══════════════════════════════════════════
+function renderDashboardAnual() {
+  let totalIng=0, totalFij=0, totalAho=0, totalVid=0;
+  let mesesConDatos = 0;
+  let avgIng=0, avgFij=0, avgAho=0, avgBal=0;
+
+  const tbody = document.getElementById('tabla-resumen-anual');
+  if (tbody) tbody.innerHTML = '';
+
+  MONTHS.forEach((mes, i) => {
+    const d   = allData[i];
+    const ing = sum(d.ingresos,'est');
+    const fij = sumM(d.fijosInd,'est') + sumM(d.fijosNoi,'est');
+    const aho = sum(d.ahorro,'est');
+    const vid = sumM(d.vida,'est');
+    const bal = ing - fij - aho - vid;
+
+    // Ganancia inversiones del portafolio para ese mes
+    const invGan = calcInvGananciaMes();
+
+    totalIng += ing; totalFij += fij; totalAho += aho; totalVid += vid;
+
+    const hasData = ing > 0;
+    if (hasData) {
+      mesesConDatos++;
+      avgIng += ing; avgFij += fij; avgAho += aho; avgBal += bal;
+    }
+
+    if (tbody) {
+      const tr = document.createElement('tr');
+      tr.className = hasData ? '' : 'empty-row';
+      const balColor = bal >= 0 ? 'var(--accent)' : 'var(--danger)';
+      tr.innerHTML = `
+        <td onclick="jumpToMonth(${i})" title="Ver ${mes}">${mes}</td>
+        <td style="color:var(--accent)">${hasData ? fmt(ing) : '—'}</td>
+        <td style="color:var(--accent2)">${hasData ? fmt(fij) : '—'}</td>
+        <td style="color:var(--warn)">${hasData ? fmt(aho) : '—'}</td>
+        <td style="color:var(--accent3)">${hasData ? fmt(vid) : '—'}</td>
+        <td style="color:var(--accent)">${hasData ? fmt(invGan) : '—'}</td>
+        <td style="color:${balColor}">${hasData ? fmt(bal) : '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
+
+  // Fila de totales
+  if (tbody) {
+    const balTotal = totalIng - totalFij - totalAho - totalVid;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>Total año</td>
+      <td>${fmt(totalIng)}</td>
+      <td>${fmt(totalFij)}</td>
+      <td>${fmt(totalAho)}</td>
+      <td>${fmt(totalVid)}</td>
+      <td>${fmt(calcInvGananciaMes() * mesesConDatos)}</td>
+      <td>${fmt(balTotal)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Tarjetas totales
+  setText('an-ing-total', fmt(totalIng));
+  setText('an-fij-total', fmt(totalFij));
+  setText('an-vid-total', fmt(totalVid));
+  setText('an-aho-total', fmt(totalAho));
+  setText('an-fij-pct',   totalIng > 0 ? pct(totalFij,totalIng) + '% del ingreso' : '0%');
+  setText('an-vid-pct',   totalIng > 0 ? pct(totalVid,totalIng) + '% del ingreso' : '0%');
+  setText('an-aho-pct',   totalIng > 0 ? pct(totalAho,totalIng) + '% del ingreso' : '0%');
+
+  // Portafolio de inversiones
+  const portTotal   = myPortafolio.reduce((s,inv) => s + (inv.monto||0), 0);
+  const portGanAnual = myPortafolio.reduce((s,inv) => {
+    const p = PLATFORMS.find(x => x.id === inv.platId);
+    const tasa = inv.tasa || (p ? p.rate : 0);
+    return s + (inv.monto||0) * tasa / 100;
+  }, 0);
+  const tasaProm = portTotal > 0
+    ? (myPortafolio.reduce((s,inv) => {
+        const p = PLATFORMS.find(x => x.id === inv.platId);
+        return s + (inv.monto||0) * (inv.tasa || (p?p.rate:0));
+      }, 0) / portTotal).toFixed(2)
+    : 0;
+
+  setText('an-inv-total',    fmt(portTotal));
+  setText('an-inv-ganancia', fmt(portGanAnual));
+  setText('an-inv-tasa',     `Tasa promedio ${tasaProm}%`);
+
+  // Balance anual
+  const balAnual = totalIng - totalFij - totalAho - totalVid;
+  setText('an-balance', fmt(balAnual));
+  const balCard = document.getElementById('an-balance-card');
+  if (balCard) {
+    balCard.className = 'anual-card ' + (balAnual >= 0 ? 'green' : 'red');
+  }
+  const balEl = document.getElementById('an-balance');
+  if (balEl) balEl.className = 'anual-val ' + (balAnual >= 0 ? 'green' : 'red');
+
+  // Promedios
+  const n = mesesConDatos || 1;
+  setText('an-avg-ing',      fmt(Math.round(avgIng/n)));
+  setText('an-avg-fij',      fmt(Math.round(avgFij/n)));
+  setText('an-avg-aho',      fmt(Math.round(avgAho/n)));
+  const avgBalVal = Math.round(avgBal/n);
+  const avgBalEl = document.getElementById('an-avg-bal');
+  if (avgBalEl) {
+    avgBalEl.textContent = fmt(avgBalVal);
+    avgBalEl.className = 'anual-val ' + (avgBalVal >= 0 ? 'green' : 'red');
+  }
+  setText('an-meses-badge',  mesesConDatos + ' mes' + (mesesConDatos!==1?'es':'') + ' con datos');
+}
+
+// Calcula la ganancia mensual del portafolio
+function calcInvGananciaMes() {
+  return myPortafolio.reduce((s,inv) => {
+    const p = PLATFORMS.find(x => x.id === inv.platId);
+    const tasa = inv.tasa || (p ? p.rate : 0);
+    return s + (inv.monto||0) * tasa / 100 / 12;
+  }, 0);
+}
+
+// Ir a un mes específico desde la tabla anual
+function jumpToMonth(i) {
+  currentMonth = i;
+  const panelAnual = document.getElementById('dash-panel-anual');
+  const panelMes   = document.getElementById('dash-panel-mes');
+  if (panelAnual) panelAnual.classList.remove('active');
+  if (panelMes)   panelMes.classList.add('active');
+  const subtitle = document.getElementById('dash-subtitle');
+  if (subtitle) subtitle.textContent = MONTHS[i] + ' ' + YEAR;
+  buildMonthBars();
+  renderPresupuesto();
+  updateDashboard();
+  updateCopyBtn();
+}
+
+// Ganancia de inversiones en dashboard mensual
+function updateInvGananciaDash() {
+  const ganMes  = calcInvGananciaMes();
+  const portTotal = myPortafolio.reduce((s,inv) => s + (inv.monto||0), 0);
+  const tasaProm = portTotal > 0
+    ? (myPortafolio.reduce((s,inv) => {
+        const p = PLATFORMS.find(x => x.id === inv.platId);
+        return s + (inv.monto||0) * (inv.tasa || (p?p.rate:0));
+      }, 0) / portTotal).toFixed(2)
+    : 0;
+  const wrap = document.getElementById('d-inv-ganancia-wrap');
+  if (wrap) {
+    wrap.style.display = myPortafolio.length > 0 ? 'block' : 'none';
+    setText('d-inv-ganancia-mes', fmt(Math.round(ganMes)));
+    setText('d-inv-tasa-prom',   tasaProm + '%');
+  }
+}
+
 function buildMonthBars() {
-  ['dash','pres'].forEach(prefix => {
-    const bar = document.getElementById('month-bar-' + prefix);
-    bar.innerHTML = '';
+  // Dashboard tab bar (Anual + meses)
+  const dashBar = document.getElementById('dash-tab-bar');
+  if (dashBar) {
+    dashBar.innerHTML = '';
+    // Tab Anual
+    const anualBtn = document.createElement('button');
+    anualBtn.className = 'dash-tab anual' + (currentMonth === -1 ? ' active' : '');
+    anualBtn.textContent = '📊 Anual';
+    anualBtn.onclick = () => { currentMonth = -1; switchMonth(); };
+    dashBar.appendChild(anualBtn);
+    // Tabs por mes
+    MONTHS.forEach((m, i) => {
+      const btn = document.createElement('button');
+      const d = allData[i];
+      const hasData = sum(d.ingresos,'est') > 0;
+      btn.className = 'dash-tab' + (i === currentMonth ? ' active' : '') + (hasData ? ' has-data' : '');
+      btn.textContent = m.slice(0,3);
+      btn.onclick = () => { currentMonth = i; switchMonth(); };
+      dashBar.appendChild(btn);
+    });
+  }
+  // Presupuesto month bar (sin tab anual)
+  const presBar = document.getElementById('month-bar-pres');
+  if (presBar) {
+    presBar.innerHTML = '';
     MONTHS.forEach((m, i) => {
       const btn = document.createElement('button');
       btn.className = 'month-btn' + (i === currentMonth ? ' active' : '');
       btn.textContent = m.slice(0,3);
       btn.onclick = () => { currentMonth = i; switchMonth(); };
-      bar.appendChild(btn);
+      presBar.appendChild(btn);
     });
-  });
+  }
 }
 
 function switchMonth() {
   buildMonthBars();
-  document.getElementById('dash-mes').textContent = MONTHS[currentMonth] + ' ' + YEAR;
-  document.getElementById('pres-mes-label').textContent = MONTHS[currentMonth] + ' ' + YEAR;
-  renderPresupuesto();
-  updateDashboard();
-  calcAverages();
+
+  // Dashboard: mostrar panel anual o panel mes
+  const panelAnual = document.getElementById('dash-panel-anual');
+  const panelMes   = document.getElementById('dash-panel-mes');
+  const subtitle   = document.getElementById('dash-subtitle');
+
+  if (currentMonth === -1) {
+    // Vista anual
+    if (panelAnual) panelAnual.classList.add('active');
+    if (panelMes)   panelMes.classList.remove('active');
+    if (subtitle)   subtitle.textContent = 'Resumen anual · ' + YEAR;
+    renderDashboardAnual();
+  } else {
+    // Vista mensual
+    if (panelAnual) panelAnual.classList.remove('active');
+    if (panelMes)   panelMes.classList.add('active');
+    if (subtitle)   subtitle.textContent = MONTHS[currentMonth] + ' ' + YEAR;
+    const presLabel = document.getElementById('pres-mes-label');
+    if (presLabel) presLabel.textContent = MONTHS[currentMonth] + ' ' + YEAR;
+    renderPresupuesto();
+    updateDashboard();
+  }
   updateCopyBtn();
 }
 
@@ -2707,6 +2990,7 @@ function toggleSection(id) {
 // RENDER PRESUPUESTO
 // ═══════════════════════════════════════════
 function renderPresupuesto() {
+  if (currentMonth < 0) return;
   const d = allData[currentMonth];
   renderIngresos(d);
   renderFijos(d);
@@ -2913,6 +3197,7 @@ function renderVida(d) {
 // ADD ROWS
 // ═══════════════════════════════════════════
 function addRow(section) {
+  if (currentMonth < 0) return;
   const d = allData[currentMonth];
   if (section === 'ingresos') { d.ingresos.push({ label:'Nuevo ingreso', est:0, real:0 }); renderIngresos(d); }
   else if (section === 'fijos') { d.fijosNoi.push({ label:'Nuevo gasto fijo', est:0, real:0, freq:'Mensual' }); renderFijos(d); }
@@ -3052,6 +3337,7 @@ function loadMetas() {
 }
 
 function updateDashboard() {
+  if (currentMonth < 0) return;
   const d = allData[currentMonth];
   const ingEst  = sum(d.ingresos, 'est');
   const fijEst  = sumM(d.fijosInd, 'est') + sumM(d.fijosNoi, 'est');
@@ -3086,6 +3372,8 @@ function updateDashboard() {
 
   // Balance bars
   updateBalanceBars(d, ingEst);
+  // Ganancia inversiones
+  updateInvGananciaDash();
 }
 
 // est = estimado (esperado), real = real, ingreso = ingreso estimado, target = fracción meta
@@ -4751,11 +5039,14 @@ function initTheme() {
 
 initTheme();
 
+currentMonth = -1;
 buildMonthBars();
 loadMetas();
 initFechaBadges();
-calcAverages();
+renderDashboardAnual();
 updateCopyBtn();
+// Pre-render presupuesto del mes 0 en background
+currentMonth = 0; renderPresupuesto(); currentMonth = -1;
 renderPresupuesto();
 updateDashboard();
 </script>
