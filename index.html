@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -228,9 +229,10 @@
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    gap: 14px;
     margin-bottom: 28px;
   }
+  .summary-card.span2 { grid-column: span 2; }
 
   .summary-card {
     background: var(--card);
@@ -250,6 +252,8 @@
   .summary-card.blue::after   { background: var(--accent2); }
   .summary-card.pink::after   { background: var(--accent3); }
   .summary-card.yellow::after { background: var(--warn); }
+  .summary-card.teal::after  { background: #2DD4BF; }
+  .card-value.teal { color: #2DD4BF; }
 
   .card-label {
     font-size: 11px;
@@ -683,6 +687,7 @@
     .logo-mark, .logo-sub, .nav-section, .nav-item span:not(.nav-icon) { display: none; }
     .main { margin-left: 60px; padding: 20px; }
     .summary-grid { grid-template-columns: 1fr 1fr; }
+    .summary-card.teal::after { background: #2DD4BF; }
     .meters-row { grid-template-columns: 1fr; }
     .dashboard-grid { grid-template-columns: 1fr; }
   }
@@ -788,16 +793,17 @@
 
   /* ── DASHBOARD TABS (Anual / meses) ── */
   .dash-tab-bar {
-    display: flex; gap: 4px; margin-bottom: 24px;
+    display: flex; gap: 3px; margin-bottom: 24px;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 12px; padding: 5px; width: 100%;
-    overflow-x: auto; flex-wrap: nowrap;
+    overflow-x: auto; flex-wrap: nowrap; box-sizing: border-box;
   }
   .dash-tab {
-    padding: 6px 12px; border-radius: 8px; border: none;
+    padding: 6px 10px; border-radius: 8px; border: none;
     background: transparent; color: var(--muted);
-    font-family: var(--sans); font-size: 12px; font-weight: 600;
-    cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+    font-family: var(--sans); font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    flex-shrink: 0; min-width: 36px; text-align: center;
   }
   .dash-tab:hover { color: var(--text); }
   .dash-tab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
@@ -1139,7 +1145,7 @@
   /* MI PORTAFOLIO */
   .portafolio-row {
     display: grid;
-    grid-template-columns: 36px 1fr 100px 100px 100px 80px;
+    grid-template-columns: 36px 0.5fr 110px 110px 65px 180px;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
@@ -1149,7 +1155,7 @@
   .portafolio-row:hover { background: rgba(255,255,255,0.02); }
   .portafolio-headers {
     display: grid;
-    grid-template-columns: 36px 1fr 100px 100px 100px 80px;
+    grid-template-columns: 36px 0.5fr 110px 110px 65px 180px;
     gap: 12px;
     padding: 8px 16px;
     border-bottom: 1px solid var(--border);
@@ -1292,187 +1298,276 @@
       <div class="topbar">
         <div>
           <div class="page-title">Dashboard</div>
-          <div class="page-subtitle">Resumen financiero · <span id="dash-mes">Enero 2026</span> &nbsp;·&nbsp; <span id="dash-avg-badge" style="font-size:11px;padding:2px 8px;border-radius:6px;background:rgba(96,165,250,0.1);color:var(--accent2)">Promedio anual: calculando...</span></div>
+          <div class="page-subtitle" id="dash-subtitle">Resumen anual · 2026</div>
         </div>
         <div class="topbar-actions">
           <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
         </div>
       </div>
 
-      <!-- Month selector -->
-      <div class="month-bar" id="month-bar-dash"></div>
+      <!-- Tab bar: Anual + 12 meses -->
+      <div class="dash-tab-bar" id="dash-tab-bar"></div>
 
-      <!-- Summary cards -->
-      <div class="summary-grid">
-        <div class="summary-card green">
-          <div class="card-label">Ingresos del mes</div>
-          <div class="card-value green" id="d-ingresos">$0</div>
-          <div class="card-detail">Total estimado</div>
-        </div>
-        <div class="summary-card blue">
-          <div class="card-label">Gastos fijos (50%)</div>
-          <div class="card-value blue" id="d-fijos">$0</div>
-          <div class="card-detail">Meta: <span id="d-fijos-meta">$0</span></div>
-        </div>
-        <div class="summary-card pink">
-          <div class="card-label">Estilo de vida (30%)</div>
-          <div class="card-value pink" id="d-vida">$0</div>
-          <div class="card-detail">Meta: <span id="d-vida-meta">$0</span></div>
-        </div>
-        <div class="summary-card yellow">
-          <div class="card-label">Ahorro e inversión (20%)</div>
-          <div class="card-value yellow" id="d-ahorro">$0</div>
-          <div class="card-detail">Meta: <span id="d-ahorro-meta">$0</span></div>
-        </div>
-      </div>
+      <!-- ══ PANEL ANUAL ══ -->
+      <div class="anual-panel active" id="dash-panel-anual">
 
-      <!-- Metas configurables -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="font-size:12px;color:var(--muted)">Ajusta tus metas de distribución — deben sumar 100%</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:12px;color:var(--muted)">Suma:</span>
-          <span id="pct-suma-badge" style="font-family:var(--mono);font-size:13px;font-weight:600;padding:2px 10px;border-radius:6px;background:rgba(74,222,128,0.1);color:var(--accent)">100%</span>
-          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="resetMetas()">Restaurar 50/20/30</button>
+        <!-- Fila 1: totales año -->
+        <div class="anual-grid-top">
+          <div class="anual-card green">
+            <div class="anual-label">Ingresos totales año</div>
+            <div class="anual-val green" id="an-ing-total">$0</div>
+            <div class="anual-sub">Estimado acumulado</div>
+          </div>
+          <div class="anual-card blue">
+            <div class="anual-label">Gastos fijos año</div>
+            <div class="anual-val blue" id="an-fij-total">$0</div>
+            <div class="anual-sub" id="an-fij-pct">0% del ingreso</div>
+          </div>
+          <div class="anual-card pink">
+            <div class="anual-label">Estilo de vida año</div>
+            <div class="anual-val pink" id="an-vid-total">$0</div>
+            <div class="anual-sub" id="an-vid-pct">0% del ingreso</div>
+          </div>
+          <div class="anual-card yellow">
+            <div class="anual-label">Ahorro año</div>
+            <div class="anual-val yellow" id="an-aho-total">$0</div>
+            <div class="anual-sub" id="an-aho-pct">0% del ingreso</div>
+          </div>
         </div>
-      </div>
-      <div class="meters-row">
-        <!-- GASTOS FIJOS -->
-        <div class="meter-card">
-          <div class="meter-header">
-            <div>
-              <div class="meter-title">💼 Gastos Fijos</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-                <span style="font-size:12px;color:var(--muted)">Meta:</span>
-                <input type="number" id="meta-fijos" value="50" min="0" max="100" step="1"
-                  style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
-                  oninput="onMetaChange()">
-                <span style="font-size:12px;color:var(--muted)">%</span>
-              </div>
+
+        <!-- Fila 2: inversiones y balance -->
+        <div class="anual-grid-mid">
+          <div class="anual-card teal">
+            <div class="anual-label">💼 Total invertido</div>
+            <div class="anual-val teal" id="an-inv-total">$0</div>
+            <div class="anual-sub">Monto en portafolio</div>
+          </div>
+          <div class="anual-card green">
+            <div class="anual-label">📈 Ganancia inversiones (año)</div>
+            <div class="anual-val green" id="an-inv-ganancia">$0</div>
+            <div class="anual-sub" id="an-inv-tasa">Tasa promedio 0%</div>
+          </div>
+          <div class="anual-card" id="an-balance-card">
+            <div class="anual-label">⚖️ Balance anual</div>
+            <div class="anual-val" id="an-balance">$0</div>
+            <div class="anual-sub">Ingresos − gastos totales</div>
+          </div>
+        </div>
+
+        <!-- Fila 3: promedios mensuales -->
+        <div class="anual-grid-top" style="margin-bottom:20px">
+          <div class="anual-card">
+            <div class="anual-label">Ingreso prom./mes</div>
+            <div class="anual-val green" id="an-avg-ing">$0</div>
+            <div class="anual-sub" id="an-meses-badge">0 meses con datos</div>
+          </div>
+          <div class="anual-card">
+            <div class="anual-label">Gasto fijo prom./mes</div>
+            <div class="anual-val blue" id="an-avg-fij">$0</div>
+          </div>
+          <div class="anual-card">
+            <div class="anual-label">Ahorro prom./mes</div>
+            <div class="anual-val yellow" id="an-avg-aho">$0</div>
+          </div>
+          <div class="anual-card">
+            <div class="anual-label">Balance prom./mes</div>
+            <div class="anual-val" id="an-avg-bal">$0</div>
+          </div>
+        </div>
+
+        <!-- Tabla resumen 12 meses -->
+        <div class="budget-section">
+          <div class="section-header" style="cursor:default">
+            <div class="section-title-row">
+              <span class="section-icon">📅</span>
+              <span class="section-title">Detalle por mes — haz clic en un mes para verlo</span>
             </div>
-            <div class="meter-pct ok" id="m-fijos-pct">0%</div>
           </div>
-          <!-- Esperado -->
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-blue" id="m-fijos-bar-est" style="width:0%;opacity:0.35"></div>
-          </div>
-          <!-- Real -->
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-blue" id="m-fijos-bar" style="width:0%"></div>
-          </div>
-          <div class="meter-amounts" style="margin-top:8px;">
-            <span id="m-fijos-real" style="font-size:12px">$0 real</span>
-            <span style="font-size:12px">meta <span id="m-fijos-goal">$0</span></span>
-          </div>
-        </div>
-
-        <!-- AHORRO -->
-        <div class="meter-card">
-          <div class="meter-header">
-            <div>
-              <div class="meter-title">🎯 Ahorro e Inversión</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-                <span style="font-size:12px;color:var(--muted)">Meta:</span>
-                <input type="number" id="meta-ahorro" value="20" min="0" max="100" step="1"
-                  style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
-                  oninput="onMetaChange()">
-                <span style="font-size:12px;color:var(--muted)">%</span>
-              </div>
-            </div>
-            <div class="meter-pct ok" id="m-ahorro-pct">0%</div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-green" id="m-ahorro-bar-est" style="width:0%;opacity:0.35"></div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-green" id="m-ahorro-bar" style="width:0%"></div>
-          </div>
-          <div class="meter-amounts" style="margin-top:8px;">
-            <span id="m-ahorro-real" style="font-size:12px">$0 real</span>
-            <span style="font-size:12px">meta <span id="m-ahorro-goal">$0</span></span>
-          </div>
-        </div>
-
-        <!-- ESTILO DE VIDA -->
-        <div class="meter-card">
-          <div class="meter-header">
-            <div>
-              <div class="meter-title">✨ Estilo de Vida</div>
-              <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
-                <span style="font-size:12px;color:var(--muted)">Meta:</span>
-                <input type="number" id="meta-vida" value="30" min="0" max="100" step="1"
-                  style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
-                  oninput="onMetaChange()">
-                <span style="font-size:12px;color:var(--muted)">%</span>
-              </div>
-            </div>
-            <div class="meter-pct ok" id="m-vida-pct">0%</div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-pink" id="m-vida-bar-est" style="width:0%;opacity:0.35"></div>
-          </div>
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
-          <div class="meter-bar-bg">
-            <div class="meter-bar-fill fill-pink" id="m-vida-bar" style="width:0%"></div>
-          </div>
-          <div class="meter-amounts" style="margin-top:8px;">
-            <span id="m-vida-real" style="font-size:12px">$0 real</span>
-            <span style="font-size:12px">meta <span id="m-vida-goal">$0</span></span>
+          <div style="overflow-x:auto">
+            <table class="mes-resumen-table">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Ingresos</th>
+                  <th>Gastos fijos</th>
+                  <th>Ahorro</th>
+                  <th>Estilo vida</th>
+                  <th>Gan. inversiones</th>
+                  <th>Balance</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-resumen-anual"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- Charts -->
-      <div class="dashboard-grid">
-        <div class="chart-card">
-          <div class="chart-title">Distribución del gasto estimado</div>
-          <div class="donut-wrap">
-            <svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg">
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#2A3050" stroke-width="18"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#60A5FA" stroke-width="18"
-                stroke-dasharray="157 157" stroke-dashoffset="39" id="donut-fijos"
-                transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#4ADE80" stroke-width="18"
-                stroke-dasharray="62 252" stroke-dashoffset="0" id="donut-ahorro"
-                transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
-              <circle cx="60" cy="60" r="50" fill="none" stroke="#F472B6" stroke-width="18"
-                stroke-dasharray="94 220" stroke-dashoffset="-62" id="donut-vida"
-                transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
-              <text x="60" y="56" text-anchor="middle" fill="#E8EAF0" font-size="13" font-family="DM Mono" font-weight="500" id="donut-center-pct">50%</text>
-              <text x="60" y="70" text-anchor="middle" fill="#6B7399" font-size="9" font-family="DM Sans">fijos</text>
-            </svg>
-            <div class="donut-legend">
-              <div class="legend-item">
-                <div class="legend-dot" style="background:var(--accent2)"></div>
-                <span class="legend-label">Gastos Fijos</span>
-                <span class="legend-val" id="leg-fijos">$0</span>
+      <!-- ══ PANEL POR MES ══ -->
+      <div class="mes-panel" id="dash-panel-mes">
+
+        <!-- 5 cards: ingresos desglosado con ganancia inversiones -->
+        <div class="summary-grid">
+          <div class="summary-card green span2">
+            <div class="card-label">Ingresos del mes</div>
+            <div class="card-value green" id="d-ingresos">$0</div>
+            <div class="card-detail" style="display:flex;gap:16px;margin-top:6px">
+              <span>Presupuesto: <strong id="d-ing-pres" style="color:var(--accent)">$0</strong></span>
+              <span style="color:var(--muted)">+</span>
+              <span>Inv.: <strong id="d-inv-gan-card" style="color:#2DD4BF">$0</strong>/mes</span>
+            </div>
+          </div>
+          <div class="summary-card blue">
+            <div class="card-label">Gastos fijos</div>
+            <div class="card-value blue" id="d-fijos">$0</div>
+            <div class="card-detail">Meta: <span id="d-fijos-meta">$0</span></div>
+          </div>
+          <div class="summary-card pink">
+            <div class="card-label">Estilo de vida</div>
+            <div class="card-value pink" id="d-vida">$0</div>
+            <div class="card-detail">Meta: <span id="d-vida-meta">$0</span></div>
+          </div>
+          <div class="summary-card yellow">
+            <div class="card-label">Ahorro</div>
+            <div class="card-value yellow" id="d-ahorro">$0</div>
+            <div class="card-detail">Meta: <span id="d-ahorro-meta">$0</span></div>
+          </div>
+        </div>
+
+        <!-- Metas configurables -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:12px;color:var(--muted)">Ajusta tus metas de distribución — deben sumar 100%</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--muted)">Suma:</span>
+            <span id="pct-suma-badge" style="font-family:var(--mono);font-size:13px;font-weight:600;padding:2px 10px;border-radius:6px;background:rgba(74,222,128,0.1);color:var(--accent)">100%</span>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="resetMetas()">Restaurar 50/20/30</button>
+          </div>
+        </div>
+
+        <!-- Medidores 50/20/30 -->
+        <div class="meters-row">
+          <div class="meter-card">
+            <div class="meter-header">
+              <div>
+                <div class="meter-title">💼 Gastos Fijos</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                  <span style="font-size:12px;color:var(--muted)">Meta:</span>
+                  <input type="number" id="meta-fijos" value="50" min="0" max="100" step="1"
+                    style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
+                    oninput="onMetaChange()">
+                  <span style="font-size:12px;color:var(--muted)">%</span>
+                </div>
               </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:var(--accent)"></div>
-                <span class="legend-label">Ahorro</span>
-                <span class="legend-val" id="leg-ahorro">$0</span>
+              <div class="meter-pct ok" id="m-fijos-pct">0%</div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" id="m-fijos-bar-est" style="width:0%;opacity:0.35"></div></div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" id="m-fijos-bar" style="width:0%"></div></div>
+            <div class="meter-amounts" style="margin-top:8px;">
+              <span id="m-fijos-real" style="font-size:12px">$0 real</span>
+              <span style="font-size:12px">meta <span id="m-fijos-goal">$0</span></span>
+            </div>
+          </div>
+          <div class="meter-card">
+            <div class="meter-header">
+              <div>
+                <div class="meter-title">🎯 Ahorro e Inversión</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                  <span style="font-size:12px;color:var(--muted)">Meta:</span>
+                  <input type="number" id="meta-ahorro" value="20" min="0" max="100" step="1"
+                    style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
+                    oninput="onMetaChange()">
+                  <span style="font-size:12px;color:var(--muted)">%</span>
+                </div>
               </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background:var(--accent3)"></div>
-                <span class="legend-label">Estilo de vida</span>
-                <span class="legend-val" id="leg-vida">$0</span>
+              <div class="meter-pct ok" id="m-ahorro-pct">0%</div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-green" id="m-ahorro-bar-est" style="width:0%;opacity:0.35"></div></div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-green" id="m-ahorro-bar" style="width:0%"></div></div>
+            <div class="meter-amounts" style="margin-top:8px;">
+              <span id="m-ahorro-real" style="font-size:12px">$0 real</span>
+              <span style="font-size:12px">meta <span id="m-ahorro-goal">$0</span></span>
+            </div>
+          </div>
+          <div class="meter-card">
+            <div class="meter-header">
+              <div>
+                <div class="meter-title">✨ Estilo de Vida</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
+                  <span style="font-size:12px;color:var(--muted)">Meta:</span>
+                  <input type="number" id="meta-vida" value="30" min="0" max="100" step="1"
+                    style="width:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:2px 6px;text-align:center;outline:none;"
+                    oninput="onMetaChange()">
+                  <span style="font-size:12px;color:var(--muted)">%</span>
+                </div>
               </div>
+              <div class="meter-pct ok" id="m-vida-pct">0%</div>
+            </div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;">Esperado</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-pink" id="m-vida-bar-est" style="width:0%;opacity:0.35"></div></div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin:5px 0 3px;">Real</div>
+            <div class="meter-bar-bg"><div class="meter-bar-fill fill-pink" id="m-vida-bar" style="width:0%"></div></div>
+            <div class="meter-amounts" style="margin-top:8px;">
+              <span id="m-vida-real" style="font-size:12px">$0 real</span>
+              <span style="font-size:12px">meta <span id="m-vida-goal">$0</span></span>
             </div>
           </div>
         </div>
 
-        <div class="chart-card">
-          <div class="chart-title">Balance estimado vs real</div>
-          <div class="bar-chart" id="balance-bars">
-            <div style="color:var(--muted);font-size:13px;">Ingresa datos en el módulo de Presupuesto para ver el balance aquí.</div>
+        <!-- Gráficas -->
+        <div class="dashboard-grid">
+          <div class="chart-card">
+            <div class="chart-title">Distribución del gasto estimado</div>
+            <div class="donut-wrap">
+              <svg width="120" height="120" viewBox="0 0 120 120" id="donut-svg">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#2A3050" stroke-width="18"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#60A5FA" stroke-width="18"
+                  stroke-dasharray="157 157" stroke-dashoffset="39" id="donut-fijos"
+                  transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#4ADE80" stroke-width="18"
+                  stroke-dasharray="62 252" stroke-dashoffset="0" id="donut-ahorro"
+                  transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#F472B6" stroke-width="18"
+                  stroke-dasharray="94 220" stroke-dashoffset="-62" id="donut-vida"
+                  transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
+                <text x="60" y="56" text-anchor="middle" fill="#E8EAF0" font-size="13" font-family="DM Mono" font-weight="500" id="donut-center-pct">50%</text>
+                <text x="60" y="70" text-anchor="middle" fill="#6B7399" font-size="9" font-family="DM Sans">fijos</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--accent2)"></div>
+                  <span class="legend-label">Gastos Fijos</span>
+                  <span class="legend-val" id="leg-fijos">$0</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--accent)"></div>
+                  <span class="legend-label">Ahorro</span>
+                  <span class="legend-val" id="leg-ahorro">$0</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:var(--accent3)"></div>
+                  <span class="legend-label">Estilo de vida</span>
+                  <span class="legend-val" id="leg-vida">$0</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background:#2DD4BF"></div>
+                  <span class="legend-label">Gan. inversiones</span>
+                  <span class="legend-val" id="leg-inv">$0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Balance estimado vs real</div>
+            <div class="bar-chart" id="balance-bars">
+              <div style="color:var(--muted);font-size:13px;">Ingresa datos en el módulo de Presupuesto para ver el balance aquí.</div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </div><!-- fin mes-panel -->
+    </div><!-- fin page-dashboard -->
 
     <!-- ══════════ PRESUPUESTO ══════════ -->
     <div class="page" id="page-presupuesto">
@@ -2030,117 +2125,69 @@
 
       <!-- ── CALCULADORA ── -->
       <div class="inv-panel" id="inv-calculadora">
-
         <div class="calc-card">
-          <div class="calc-title">Calculadora de rendimiento</div>
-          <div class="calc-grid">
+
+          <!-- Header -->
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
             <div>
-              <div class="field-label">Plataforma</div>
-              <select class="field-input" id="calc-platform" onchange="updateCalcRate()">
-                <!-- JS -->
-              </select>
-              <div class="field-hint" id="calc-platform-hint">Selecciona una plataforma</div>
+              <div class="calc-title" style="margin-bottom:4px;">🧮 Calculadora de inversiones</div>
+              <div style="font-size:13px;color:var(--muted)">Cada plataforma tiene su propio periodo, tasa y tipo de reinversión</div>
             </div>
-            <div>
-              <div class="field-label">Tasa anual (%)</div>
-              <input class="field-input" type="number" id="calc-rate" value="13" min="0" max="30" step="0.01" oninput="calcRendimiento()">
-              <div class="field-hint">Editable — puedes ajustarla manualmente</div>
-            </div>
-            <div>
-              <div class="field-label">Monto a invertir ($)</div>
-              <input class="field-input" type="number" id="calc-monto" value="10000" min="0" oninput="calcRendimiento(); updateSlider()">
-              <div class="range-wrap">
-                <input type="range" id="calc-slider" min="0" max="500000" step="1000" value="10000" oninput="syncMonto(this.value)">
-              </div>
-              <div class="field-hint">Desliza o escribe el monto</div>
-            </div>
-            <div>
-              <div class="field-label">Horizonte de tiempo</div>
-              <select class="field-input" id="calc-plazo" onchange="calcRendimiento()">
-                <option value="1">1 mes</option>
-                <option value="3">3 meses</option>
-                <option value="6">6 meses</option>
-                <option value="12" selected>1 año</option>
-                <option value="24">2 años</option>
-                <option value="36">3 años</option>
-                <option value="60">5 años</option>
-                <option value="120">10 años</option>
-              </select>
-            </div>
-            <div>
-              <div class="field-label">Inflación anual estimada (%)</div>
-              <input class="field-input" type="number" id="calc-inflacion" value="3.55" min="0" max="20" step="0.1" oninput="calcRendimiento()">
-              <div class="field-hint">Inflación en México junio 2026: ~3.55%</div>
-            </div>
-            <div>
-              <div class="field-label">Reinversión de intereses</div>
-              <select class="field-input" id="calc-reinv" onchange="calcRendimiento()">
-                <option value="1">Sí — interés compuesto</option>
-                <option value="0">No — solo interés simple</option>
-              </select>
-              <div class="field-hint">Reinvertir acelera el crecimiento</div>
-            </div>
+            <button class="btn btn-primary" onclick="addCalcRow()">＋ Agregar inversión</button>
           </div>
 
-          <div class="results-grid">
-            <div class="result-box">
-              <div class="result-label">Ganancia bruta</div>
-              <div class="result-val" id="res-bruta" style="color:var(--accent)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">ISR estimado (0.9%)</div>
-              <div class="result-val" id="res-isr" style="color:var(--danger)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Ganancia neta</div>
-              <div class="result-val" id="res-neta" style="color:var(--accent)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Total al vencer</div>
-              <div class="result-val" id="res-total" style="color:var(--text)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Rendimiento real</div>
-              <div class="result-val" id="res-real" style="color:var(--warn)">0%</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Poder adquisitivo</div>
-              <div class="result-val" id="res-poder" style="color:var(--muted)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Ganancia mensual</div>
-              <div class="result-val" id="res-mensual" style="color:var(--accent2)">$0</div>
-            </div>
-            <div class="result-box">
-              <div class="result-label">Regla del 72 (doblar)</div>
-              <div class="result-val" id="res-r72" style="color:var(--muted)">0 años</div>
-            </div>
-          </div>
+          <!-- Filas de plataformas -->
+          <div id="calc-rows-container" style="margin-bottom:16px;"></div>
 
-          <!-- Projection table -->
-          <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Proyección periodo a periodo</div>
-          <div class="table-scroll">
-            <table class="timeline-table">
-              <thead>
-                <tr>
-                  <th>Periodo</th>
-                  <th>Capital</th>
-                  <th>Interés ganado</th>
-                  <th>ISR</th>
-                  <th>Neto acumulado</th>
-                  <th>Valor real (inflación)</th>
-                </tr>
-              </thead>
-              <tbody id="timeline-body">
-              </tbody>
-            </table>
-          </div>
-        </div>
+          <!-- Botón calcular -->
+          <button class="btn btn-primary" onclick="calcMulti()" style="width:100%;margin-bottom:24px;padding:12px;">
+            📊 Calcular rendimientos
+          </button>
 
-        <!-- Comparación multi-plataforma -->
-        <div class="calc-card">
-          <div class="calc-title" style="font-size:16px;margin-bottom:16px;">Compara el mismo monto en varias plataformas</div>
-          <div id="multi-compare-table"><!-- JS --></div>
+          <!-- Resultados -->
+          <div id="calc-results" style="display:none;">
+
+            <!-- Tabla por plataforma -->
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Resumen por plataforma</div>
+            <div class="table-scroll" style="margin-bottom:20px;">
+              <table class="timeline-table">
+                <thead>
+                  <tr>
+                    <th style="text-align:left">Plataforma</th>
+                    <th>Monto</th>
+                    <th>Tasa</th>
+                    <th>Ganancia mensual</th>
+                    <th>Ganancia total</th>
+                    <th>Total al vencer</th>
+                  </tr>
+                </thead>
+                <tbody id="calc-tabla-plataformas"></tbody>
+              </table>
+            </div>
+
+            <!-- Tabla mes a mes -->
+            <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Ganancia acumulada mes a mes</div>
+            <div class="table-scroll">
+              <table class="timeline-table" id="calc-tabla-meses">
+                <thead id="calc-meses-head"></thead>
+                <tbody id="calc-meses-body"></tbody>
+              </table>
+            </div>
+
+            <!-- Botones guardar -->
+            <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+              <button class="btn btn-primary" style="flex:1;padding:12px" onclick="guardarCarteraEnPortafolio()">
+                💼 Guardar cartera en portafolio
+              </button>
+              <button class="btn btn-ghost" style="flex:1;padding:12px" onclick="guardarCarteraEnPresupuesto()">
+                📋 Agregar pagos al presupuesto
+              </button>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">
+              Guardar en portafolio agrega cada inversión al módulo Mi portafolio · Agregar al presupuesto las suma como ahorro en el mes de inicio
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -2169,8 +2216,18 @@
                 <input class="field-input" type="date" id="inv-fecha-inp">
               </div>
               <div>
+                <div class="field-label">Fecha de vencimiento</div>
+                <input class="field-input" type="date" id="inv-fecha-fin-inp">
+                <div class="field-hint">Opcional — deja vacío si es indefinido</div>
+              </div>
+              <div>
                 <div class="field-label">Tasa acordada (%)</div>
                 <input class="field-input" type="number" id="inv-tasa-inp" placeholder="13" step="0.01">
+              </div>
+              <div>
+                <div class="field-label">Plazo equivalente</div>
+                <div id="inv-plazo-calc" style="font-family:var(--mono);font-size:14px;color:var(--accent);padding:10px 0;">—</div>
+                <div class="field-hint">Se calcula con las fechas</div>
               </div>
             </div>
             <div style="display:flex;gap:10px;">
@@ -2893,12 +2950,7 @@ function updateInvGananciaDash() {
         return s + (inv.monto||0) * (inv.tasa || (p?p.rate:0));
       }, 0) / portTotal).toFixed(2)
     : 0;
-  const wrap = document.getElementById('d-inv-ganancia-wrap');
-  if (wrap) {
-    wrap.style.display = myPortafolio.length > 0 ? 'block' : 'none';
-    setText('d-inv-ganancia-mes', fmt(Math.round(ganMes)));
-    setText('d-inv-tasa-prom',   tasaProm + '%');
-  }
+  // Card de ingresos ya muestra la ganancia via updateDashboard
 }
 
 function buildMonthBars() {
@@ -3350,6 +3402,11 @@ function updateDashboard() {
   const metas = getMetas();
 
   setText('d-ingresos', fmt(ingEst));
+  setText('d-ing-pres', fmt(ingEst));
+  // Ganancia inversiones en card de ingresos
+  const ganMesInv = calcInvGananciaMes();
+  setText('d-inv-gan-card', fmt(Math.round(ganMesInv)));
+  setText('leg-inv', fmt(Math.round(ganMesInv)));
   setText('d-fijos',    fmt(fijEst));
   setText('d-ahorro',   fmt(ahoEst));
   setText('d-vida',     fmt(vidEst));
@@ -3372,8 +3429,11 @@ function updateDashboard() {
 
   // Balance bars
   updateBalanceBars(d, ingEst);
-  // Ganancia inversiones
+  // Ganancia inversiones — card y badge
   updateInvGananciaDash();
+  // Llenar card teal del dashboard
+  const ganMes = calcInvGananciaMes();
+  setText('d-inv-gan-card', fmt(Math.round(ganMes)));
 }
 
 // est = estimado (esperado), real = real, ingreso = ingreso estimado, target = fracción meta
@@ -3959,7 +4019,10 @@ function renderProps() {
             <div style="font-weight:700;font-size:15px">🏠 ${esc(p.nombre)}</div>
             <div style="font-size:12px;color:var(--muted);margin-top:2px">Desde ${p.fecha || '—'} · ${mesesEl} meses transcurridos</div>
           </div>
-          <button class="del-btn" onclick="deleteProp(${i})">🗑</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn-add-pres" onclick="openAddPresMod('Hipoteca: ${esc(p.nombre)}','${Math.round(mensual)}','fijos')">→ Presupuesto</button>
+            <button class="del-btn" onclick="deleteProp(${i})">🗑</button>
+          </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
           <div class="br-hero-box"><div class="result-label">Valor</div><div class="result-val" style="font-size:15px">${fmt(p.valor)}</div></div>
@@ -4365,6 +4428,252 @@ function showRetiroPanel(id, btn) {
 
 // Init
 retCalc();
+
+
+
+// ═══════════════════════════════════════════
+// CALCULADORA MULTI-INVERSIÓN
+// ═══════════════════════════════════════════
+
+// ── helpers de fecha YYYY-MM ──
+function mesActual() { return new Date().toISOString().slice(0,7); }
+function mesOffset(ym, n) {
+  const [y,m] = ym.split('-').map(Number);
+  const d = new Date(y, m-1+n, 1);
+  return d.toISOString().slice(0,7);
+}
+function mesesEntre(ini, fin) {
+  if (!ini||!fin) return 0;
+  const [iy,im]=ini.split('-').map(Number);
+  const [fy,fm]=fin.split('-').map(Number);
+  return Math.max(0,(fy-iy)*12+(fm-im));
+}
+
+let calcRows = [
+  { platId:'custom', nombre:'Mi inversión', monto:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true },
+];
+
+function initCalcDates() { /* ya inicializado en calcRows */ }
+function getCalcMeses() { return 0; } // cada row tiene el suyo
+
+function renderCalcRows() {
+  const cont = document.getElementById('calc-rows-container');
+  if (!cont) return;
+  cont.innerHTML = '';
+  calcRows.forEach((row, i) => {
+    const p = PLATFORMS.find(x => x.id === row.platId);
+    const mesesRow = mesesEntre(row.ini, row.fin);
+    const tasa = row.tasa || 0;
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;';
+    div.innerHTML = `
+      <!-- Fila 1: nombre libre + selector de plataforma -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 36px;gap:8px;margin-bottom:10px;align-items:end">
+        <div>
+          <div class="field-label">Nombre de la inversión</div>
+          <input type="text" class="field-input" style="font-size:13px;padding:7px 10px"
+            value="${esc(row.nombre||'')}" placeholder="ej. CETES de emergencia"
+            oninput="calcRows[${i}].nombre=this.value">
+        </div>
+        <div>
+          <div class="field-label">Plataforma (opcional)</div>
+          <select class="field-input" style="font-size:12px;padding:7px 10px"
+            onchange="(function(el){
+              calcRows[${i}].platId=el.value;
+              if(el.value!=='custom'){
+                const pp=PLATFORMS.find(x=>x.id===el.value);
+                if(pp){
+                  calcRows[${i}].tasa=pp.rate;
+                  calcRows[${i}].nombre=pp.name;
+                  renderCalcRows();
+                }
+              }
+            })(this)">
+            <option value="custom" ${row.platId==='custom'?'selected':''}>— Escribir nombre —</option>
+            ${PLATFORMS.map(p2=>`<option value="${p2.id}" ${p2.id===row.platId?'selected':''}>${p2.emoji} ${p2.name} (${p2.rate}%)</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="del-btn" style="color:var(--muted);font-size:18px" title="Quitar" onclick="removeCalcRow(${i})">✕</button>
+        </div>
+      </div>
+      <!-- Fila 2: monto, tasa, inicio, fin, reinversión -->
+      <div style="display:grid;grid-template-columns:130px 90px 120px 120px 1fr;gap:8px;align-items:end">
+        <div>
+          <div class="field-label">Monto ($)</div>
+          <input type="number" class="field-input" style="font-size:13px;padding:7px 10px;text-align:right"
+            value="${row.monto||''}" min="0" placeholder="0"
+            oninput="calcRows[${i}].monto=parseFloat(this.value)||0">
+        </div>
+        <div>
+          <div class="field-label">Tasa (%)</div>
+          <input type="number" class="field-input" style="font-size:13px;padding:7px 10px;text-align:right"
+            value="${tasa||''}" min="0" max="50" step="0.01" placeholder="0"
+            oninput="calcRows[${i}].tasa=parseFloat(this.value)||0">
+        </div>
+        <div>
+          <div class="field-label">Inicio</div>
+          <input type="month" class="field-input" style="font-size:12px;padding:7px 10px"
+            value="${row.ini||''}"
+            oninput="calcRows[${i}].ini=this.value">
+        </div>
+        <div>
+          <div class="field-label">Término</div>
+          <input type="month" class="field-input" style="font-size:12px;padding:7px 10px"
+            value="${row.fin||''}"
+            oninput="calcRows[${i}].fin=this.value">
+        </div>
+        <div>
+          <div class="field-label">Reinversión · <span style="color:var(--accent);font-family:var(--mono)">${mesesRow} mes${mesesRow!==1?'es':''}</span></div>
+          <select class="field-input" style="font-size:12px;padding:7px 10px"
+            onchange="calcRows[${i}].reinv=this.value==='1'">
+            <option value="1" ${row.reinv?'selected':''}>Sí — interés compuesto</option>
+            <option value="0" ${!row.reinv?'selected':''}>No — interés simple</option>
+          </select>
+        </div>
+      </div>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+function addCalcRow() {
+  calcRows.push({ platId:'custom', nombre:'Mi inversión', monto:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true });
+  renderCalcRows();
+}
+
+function removeCalcRow(i) {
+  if (calcRows.length <= 1) { showToast('⚠️ Debe haber al menos una plataforma'); return; }
+  calcRows.splice(i, 1);
+  renderCalcRows();
+}
+
+function calcMulti() {
+  const results = document.getElementById('calc-results');
+
+  // Calcular por fila con sus propios parámetros
+  const rows = calcRows.map(row => {
+    const p     = PLATFORMS.find(x => x.id === row.platId) || PLATFORMS[0];
+    const tasa  = row.tasa  || p.rate;
+    const monto = row.monto || 0;
+    const meses = mesesEntre(row.ini, row.fin);
+    const reinv = row.reinv;
+    const rM    = tasa / 100 / 12;
+    let ganancia;
+    if (meses <= 0) ganancia = 0;
+    else if (reinv) ganancia = monto * Math.pow(1 + rM, meses) - monto;
+    else            ganancia = monto * (tasa / 100) * (meses / 12);
+    const mensual = meses > 0 ? ganancia / meses : 0;
+    const total   = monto + ganancia;
+    const nombre = row.nombre || p?.name || 'Inversión';
+    return { p, nombre, tasa, monto, meses, reinv, ganancia, mensual, total, ini: row.ini, fin: row.fin };
+  });
+
+  const totMonto    = rows.reduce((s,r) => s + r.monto, 0);
+  const totGanancia = rows.reduce((s,r) => s + r.ganancia, 0);
+  const totMensual  = rows.reduce((s,r) => s + r.mensual, 0);
+  const totTotal    = rows.reduce((s,r) => s + r.total, 0);
+
+  // Mostrar resultados
+  if (results) results.style.display = 'block';
+
+  // Tabla resumen con periodo por fila
+  const tbody = document.getElementById('calc-tabla-plataformas');
+  if (tbody) {
+    // Actualizar encabezados para incluir periodo
+    const thead = tbody.closest('table')?.querySelector('thead tr');
+    if (thead) thead.innerHTML = `
+      <th style="text-align:left">Plataforma</th>
+      <th>Monto</th>
+      <th>Tasa</th>
+      <th>Periodo</th>
+      <th>Meses</th>
+      <th>Reinversión</th>
+      <th>Gan. mensual</th>
+      <th>Ganancia total</th>
+      <th>Total al vencer</th>
+    `;
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-family:var(--sans)">${r.p?r.p.emoji+' ':''} ${r.nombre}</td>
+        <td>${fmt(r.monto)}</td>
+        <td style="color:var(--warn)">${r.tasa}%</td>
+        <td style="color:var(--muted);font-size:11px">${r.ini||'—'} → ${r.fin||'—'}</td>
+        <td style="color:var(--muted)">${r.meses}</td>
+        <td style="color:var(--muted);font-size:11px">${r.reinv?'Compuesto':'Simple'}</td>
+        <td style="color:var(--accent2)">${fmt(r.mensual)}</td>
+        <td style="color:var(--accent);font-weight:600">${fmt(r.ganancia)}</td>
+        <td>${fmt(r.total)}</td>
+      </tr>
+    `).join('') + `
+      <tr>
+        <td style="font-family:var(--sans)">TOTAL PORTAFOLIO</td>
+        <td>${fmt(totMonto)}</td>
+        <td colspan="4" style="color:var(--muted)">—</td>
+        <td style="color:var(--accent2)">${fmt(totMensual)}</td>
+        <td style="color:var(--accent);font-weight:700">${fmt(totGanancia)}</td>
+        <td style="font-weight:700">${fmt(totTotal)}</td>
+      </tr>
+    `;
+  }
+
+  // Tabla mes a mes — usando el rango de fechas más amplio entre todas las filas
+  const thead2 = document.getElementById('calc-meses-head');
+  const tmBody = document.getElementById('calc-meses-body');
+  if (!thead2 || !tmBody) return;
+
+  // Encontrar ini más temprano y fin más tardío
+  const allInis = rows.filter(r=>r.ini).map(r=>r.ini).sort();
+  const allFins = rows.filter(r=>r.fin).map(r=>r.fin).sort();
+  if (!allInis.length || !allFins.length) return;
+  const globalIni = allInis[0];
+  const globalFin = allFins[allFins.length-1];
+  const globalMeses = mesesEntre(globalIni, globalFin);
+  if (globalMeses <= 0) return;
+
+  thead2.innerHTML = `<tr>
+    <th style="text-align:left">Mes</th>
+    ${rows.map(r => `<th>${r.p?r.p.emoji+' ':''}${r.nombre.slice(0,12)}</th>`).join('')}
+    <th>Total ganancia</th>
+    <th>Total acumulado</th>
+  </tr>`;
+
+  const [giy, gim] = globalIni.split('-').map(Number);
+  const mesesList = [];
+  for (let i = 1; i <= globalMeses; i++) {
+    const d = new Date(giy, gim - 1 + i, 1);
+    mesesList.push({ i, label: d.toLocaleDateString('es-MX', { month:'short', year:'2-digit' }), ym: d.toISOString().slice(0,7) });
+  }
+
+  tmBody.innerHTML = mesesList.map(mes => {
+    const cols = rows.map(r => {
+      // Solo calcular si este mes está dentro del rango de la fila
+      if (!r.ini || !r.fin || mes.ym <= r.ini || mes.ym > r.fin) return 0;
+      const mesesRowActual = mesesEntre(r.ini, mes.ym);
+      if (mesesRowActual <= 0) return 0;
+      const rM = r.tasa / 100 / 12;
+      if (r.reinv) return r.monto * Math.pow(1 + rM, mesesRowActual) - r.monto;
+      else         return r.monto * (r.tasa / 100) * (mesesRowActual / 12);
+    });
+    const totalGan  = cols.reduce((s,v) => s+v, 0);
+    const totalAcum = totMonto + totalGan;
+    const isLast    = mes.i === globalMeses;
+    return `<tr ${isLast?'style="font-weight:600"':''}>
+      <td style="font-family:var(--sans);color:var(--muted)">${mes.label}</td>
+      ${cols.map(v => `<td style="color:${v>0?'var(--accent)':'var(--muted)'}">${v>0?fmt(v):'—'}</td>`).join('')}
+      <td style="color:var(--accent);font-weight:600">${fmt(totalGan)}</td>
+      <td>${fmt(totalAcum)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Mantener calcRendimiento como stub para no romper referencias
+function calcRendimiento() { calcMulti(); }
+function updateCalcRate() {}
+function syncMonto() {}
+function updateSlider() {}
+function buildTimeline() {}
+function updateMultiCompare() {}
 
 
 // ═══════════════════════════════════════════
@@ -4817,6 +5126,171 @@ function buildTimeline(monto, rate, plazo, inf, reinv, ISR_RATE) {
   });
 }
 
+
+// ═══════════════════════════════════════════
+// CALCULADORA MULTI-PLATAFORMA
+// ═══════════════════════════════════════════
+let multiRows = [
+  { platId: 'nu-turbo', monto: 25000 },
+  { platId: 'klar',     monto: 25000 },
+  { platId: 'cetes28',  monto: 50000 },
+];
+
+function renderMultiRows() {
+  const cont = document.getElementById('multi-rows-container');
+  if (!cont) return;
+  cont.innerHTML = '';
+  multiRows.forEach((row, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:grid;grid-template-columns:1fr 160px 36px;gap:10px;margin-bottom:8px;align-items:center;';
+    div.innerHTML = `
+      <select class="field-input" style="font-size:13px;padding:7px 10px" onchange="multiRows[${i}].platId=this.value;renderMultiRows()">
+        ${PLATFORMS.map(p => `<option value="${p.id}" ${p.id===row.platId?'selected':''}>${p.emoji} ${p.name} (${p.rate}%)</option>`).join('')}
+      </select>
+      <input type="number" class="field-input" style="font-size:13px;padding:7px 10px;text-align:right"
+        value="${row.monto}" min="0" placeholder="Monto $"
+        oninput="multiRows[${i}].monto=parseFloat(this.value)||0">
+      <button class="del-btn" style="color:var(--muted)" onclick="removeMultiRow(${i})">✕</button>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+function addMultiRow() {
+  multiRows.push({ platId: 'cetes91', monto: 10000 });
+  renderMultiRows();
+}
+
+function removeMultiRow(i) {
+  if (multiRows.length <= 1) return;
+  multiRows.splice(i, 1);
+  renderMultiRows();
+}
+
+function calcMultiPlatform() {
+  const cont = document.getElementById('multi-compare-table');
+  if (!cont) return;
+  const plazo  = parseInt(document.getElementById('calc-plazo').value) || 12;
+  const reinv  = document.getElementById('calc-reinv').value === '1';
+  const ISR    = 0.009;
+  const plazoLabel = plazo < 12
+    ? plazo + ' mes' + (plazo > 1 ? 'es' : '')
+    : (plazo / 12) + ' año' + (plazo / 12 > 1 ? 's' : '');
+
+  // Calcular por plataforma
+  const rows = multiRows.map(row => {
+    const p = PLATFORMS.find(x => x.id === row.platId) || PLATFORMS[0];
+    const monto = row.monto || 0;
+    let ganBruta;
+    if (reinv) {
+      const rM = p.rate / 100 / 12;
+      ganBruta = monto * Math.pow(1 + rM, plazo) - monto;
+    } else {
+      ganBruta = monto * (p.rate / 100) * (plazo / 12);
+    }
+    const isr    = monto * ISR * (plazo / 12);
+    const neta   = ganBruta - isr;
+    const mensual = ganBruta / plazo;
+    return { p, monto, ganBruta, isr, neta, mensual, rate: p.rate };
+  });
+
+  // Totales
+  const totMonto   = rows.reduce((s,r) => s + r.monto, 0);
+  const totBruta   = rows.reduce((s,r) => s + r.ganBruta, 0);
+  const totISR     = rows.reduce((s,r) => s + r.isr, 0);
+  const totNeta    = rows.reduce((s,r) => s + r.neta, 0);
+  const totMensual = rows.reduce((s,r) => s + r.mensual, 0);
+  const tasaProm   = totMonto > 0
+    ? (rows.reduce((s,r) => s + r.monto * r.rate, 0) / totMonto).toFixed(2)
+    : 0;
+
+  // Tabla de ganancia por periodo (mensual hasta el horizonte)
+  // Mostrar: mes 1, 3, 6, 12 y al plazo
+  const periodos = [1, 3, 6, 12, 24, 36, 60].filter(m => m <= plazo);
+  if (!periodos.includes(plazo)) periodos.push(plazo);
+
+  const periodosRows = periodos.map(m => {
+    const cols = rows.map(row => {
+      const p = PLATFORMS.find(x => x.id === row.platId) || PLATFORMS[0];
+      let g;
+      if (reinv) {
+        const rM = p.rate / 100 / 12;
+        g = row.monto * Math.pow(1 + rM, m) - row.monto;
+      } else {
+        g = row.monto * (p.rate / 100) * (m / 12);
+      }
+      return g - row.monto * ISR * (m / 12);
+    });
+    const label = m < 12 ? m + ' mes' + (m>1?'es':'') : (m/12) + ' año' + (m/12>1?'s':'');
+    return { label, cols, total: cols.reduce((s,v) => s+v, 0) };
+  });
+
+  cont.innerHTML = `
+    <!-- Tabla principal -->
+    <div class="table-scroll" style="margin-bottom:20px">
+      <table class="timeline-table">
+        <thead><tr>
+          <th style="text-align:left">Plataforma</th>
+          <th>Monto</th>
+          <th>Tasa</th>
+          <th>Gan. bruta (${plazoLabel})</th>
+          <th>ISR</th>
+          <th>Gan. neta</th>
+          <th>Gan. mensual</th>
+        </tr></thead>
+        <tbody>
+          ${rows.map((r,i) => `
+            <tr>
+              <td style="font-family:var(--sans)">${r.p?r.p.emoji+' ':''} ${r.nombre}</td>
+              <td>${fmt(r.monto)}</td>
+              <td style="color:var(--warn)">${r.rate}%</td>
+              <td style="color:var(--accent)">${fmt(r.ganBruta)}</td>
+              <td style="color:var(--danger)">-${fmt(r.isr)}</td>
+              <td style="color:var(--accent);font-weight:600">${fmt(r.neta)}</td>
+              <td style="color:var(--accent2)">${fmt(r.mensual)}</td>
+            </tr>`).join('')}
+          <tr>
+            <td style="font-family:var(--sans)">TOTAL PORTAFOLIO</td>
+            <td>${fmt(totMonto)}</td>
+            <td style="color:var(--warn)">${tasaProm}% prom.</td>
+            <td style="color:var(--accent)">${fmt(totBruta)}</td>
+            <td style="color:var(--danger)">-${fmt(totISR)}</td>
+            <td style="color:var(--accent);font-weight:600">${fmt(totNeta)}</td>
+            <td style="color:var(--accent2)">${fmt(totMensual)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabla de proyección por periodo -->
+    <div style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
+      Ganancia neta acumulada por plataforma
+    </div>
+    <div class="table-scroll">
+      <table class="timeline-table">
+        <thead><tr>
+          <th style="text-align:left">Periodo</th>
+          ${rows.map(r => `<th>${r.p?r.p.emoji+' ':''}${r.nombre.slice(0,12)}</th>`).join('')}
+          <th>Total portafolio</th>
+        </tr></thead>
+        <tbody>
+          ${periodosRows.map(pr => `
+            <tr>
+              <td style="font-family:var(--sans);color:var(--muted)">${pr.label}</td>
+              ${pr.cols.map(v => `<td style="color:var(--accent)">${fmt(v)}</td>`).join('')}
+              <td style="color:var(--accent);font-weight:600">${fmt(pr.total)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:10px;">
+      Ganancia neta ya descuenta ISR (0.9%). ${reinv ? 'Con interés compuesto.' : 'Interés simple.'}
+      Monto total: <strong style="color:var(--text)">${fmt(totMonto)}</strong> ·
+      Tasa ponderada: <strong style="color:var(--warn)">${tasaProm}%</strong>
+    </div>
+  `;
+}
+
 function updateMultiCompare() {
   const cont = document.getElementById('multi-compare-table');
   if (!cont) return;
@@ -4892,33 +5366,55 @@ function renderPortafolio() {
     return;
   }
 
-  let totalMonto = 0, totalMensual = 0, totalAnual = 0;
+  let totalMonto = 0, totalMensual = 0, totalAnual = 0; // mensual/anual solo cuentan inversiones activas
 
   const rows = myPortafolio.map((inv, i) => {
-    const p = PLATFORMS.find(x => x.id === inv.platId) || { name: inv.platId, emoji: '💰', color: '#6B7399', bg: '#1a1a1a' };
+    const p = PLATFORMS.find(x => x.id === inv.platId) || { name: inv._nombre || inv.platId, emoji: '💰', color: '#6B7399', bg: '#1a1a1a' };
     const monto   = inv.monto || 0;
     const tasa    = inv.tasa  || p.rate;
     const mensual = monto * (tasa / 100) / 12;
     const anual   = monto * (tasa / 100);
     // Days since start
-    const inicio  = inv.fecha ? new Date(inv.fecha) : new Date();
-    const dias    = Math.max(0, Math.round((new Date() - inicio) / (1000*60*60*24)));
-    const ganAcum = monto * (tasa / 100) * (dias / 365);
-    totalMonto   += monto;
-    totalMensual += mensual;
-    totalAnual   += anual;
+    const inicio   = inv.fecha    ? new Date(inv.fecha)    : new Date();
+    const fin      = inv.fechaFin ? new Date(inv.fechaFin) : null;
+    const hoy      = new Date();
+    const diasTrans = Math.max(0, Math.round((Math.min(fin||hoy, hoy) - inicio) / (1000*60*60*24)));
+    const diasTotal = fin ? Math.max(0, Math.round((fin - inicio) / (1000*60*60*24))) : null;
+    const mesesTrans = Math.round(diasTrans / 30.4);
+    const mesesTotal = diasTotal ? Math.round(diasTotal / 30.4) : null;
+    const ganAcum  = monto * (tasa / 100) * (diasTrans / 365);
+    const vencido  = fin && hoy > fin;
+    const activo   = !vencido;
+    // Si vencida, no suma al mensual activo
+    if (activo) { totalMensual += mensual; totalAnual += anual; }
+    totalMonto += monto;
+
+    // Estado badge
+    let estadoBadge, periodoText;
+    if (!fin) {
+      estadoBadge = '<span style="background:rgba(74,222,128,0.1);color:var(--accent);font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600">ACTIVO</span>';
+      periodoText = inv.fecha ? 'Desde ' + inv.fecha + ' · ' + mesesTrans + ' meses' : 'Sin fecha';
+    } else if (vencido) {
+      estadoBadge = '<span style="background:rgba(107,115,153,0.15);color:var(--muted);font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600">VENCIDO</span>';
+      periodoText = inv.fecha + ' → ' + inv.fechaFin + ' · ' + (mesesTotal||0) + ' meses';
+    } else {
+      const diasRestantes = Math.round((fin - hoy) / (1000*60*60*24));
+      estadoBadge = '<span style="background:rgba(251,191,36,0.1);color:var(--warn);font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600">VIGENTE</span>';
+      periodoText = inv.fecha + ' → ' + inv.fechaFin + ' · ' + diasRestantes + ' días restantes';
+    }
+
     return `
       <div class="portafolio-row">
-        <div class="port-logo" style="background:${p.bg};color:${p.color}">${p.emoji}</div>
+        <div class="port-logo" style="background:${p.bg};color:${p.color};opacity:${activo?1:0.6}">${p.emoji}</div>
         <div>
-          <div class="port-name">${p.name}</div>
-          <div class="port-type">${inv.fecha ? 'Desde ' + inv.fecha : 'Sin fecha'} · ${dias} días</div>
+          <div class="port-name" style="display:flex;align-items:center;gap:6px">${p.name} ${estadoBadge}</div>
+          <div class="port-type">${periodoText}</div>
         </div>
-        <div class="port-val">${fmt(monto)}</div>
-        <div class="port-gain">+${fmt(ganAcum)}</div>
-        <div class="port-rate">${tasa}%</div>
-        <div style="display:flex;gap:6px;justify-content:flex-end">
-          <button class="btn-add-pres" onclick="openAddPresMod('${esc(p.name)} — ${fmt(inv.monto)}/mes','${Math.round(inv.monto*(inv.tasa||p.rate)/100/12)}','ahorro')">→ Presupuesto</button>
+        <div class="port-val" style="opacity:${activo?1:0.6}">${fmt(monto)}</div>
+        <div class="port-gain" style="color:${vencido?'var(--muted)':'var(--accent)'}">+${fmt(ganAcum)}</div>
+        <div class="port-rate" style="opacity:${activo?1:0.6}">${tasa}%</div>
+        <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end">
+          ${activo ? `<button class="btn-add-pres" style="font-size:10px;padding:3px 8px" onclick="openAddPresMod('${esc(p.name)}','${Math.round(inv.monto*(inv.tasa||p.rate)/100/12)}','ahorro')">→ Pres.</button>` : ''}
           <button class="del-btn" onclick="deleteInversion(${i})">🗑</button>
         </div>
       </div>
@@ -4947,7 +5443,6 @@ function populatePortafolioSelect() {
 function openAddInv() {
   const form = document.getElementById('add-inv-form');
   form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  // Set default tasa from selected platform
   const sel = document.getElementById('inv-plat-sel');
   const tasaInp = document.getElementById('inv-tasa-inp');
   if (sel && tasaInp) {
@@ -4958,20 +5453,39 @@ function openAddInv() {
       if (pp) tasaInp.value = pp.rate;
     };
   }
-  // Set today as default date
   const fechaInp = document.getElementById('inv-fecha-inp');
   if (fechaInp && !fechaInp.value) {
     fechaInp.value = new Date().toISOString().split('T')[0];
   }
+  // Limpiar fecha fin
+  const finInp = document.getElementById('inv-fecha-fin-inp');
+  if (finInp) finInp.value = '';
+  // Calcular plazo en tiempo real al cambiar fechas
+  const updatePlazo = () => {
+    const ini = document.getElementById('inv-fecha-inp').value;
+    const fin = document.getElementById('inv-fecha-fin-inp').value;
+    const el  = document.getElementById('inv-plazo-calc');
+    if (!el) return;
+    if (!ini || !fin) { el.textContent = '— (indefinido)'; el.style.color = 'var(--muted)'; return; }
+    const dias  = Math.round((new Date(fin) - new Date(ini)) / (1000*60*60*24));
+    const meses = Math.round(dias / 30.4);
+    const anios = (dias / 365).toFixed(1);
+    if (dias < 0) { el.textContent = '⚠️ Fecha inválida'; el.style.color = 'var(--danger)'; return; }
+    el.textContent = `${meses} mes${meses!==1?'es':''} (${anios} años)`;
+    el.style.color = 'var(--accent)';
+  };
+  document.getElementById('inv-fecha-inp').oninput    = updatePlazo;
+  document.getElementById('inv-fecha-fin-inp').oninput = updatePlazo;
 }
 
 function saveInversion() {
-  const platId = document.getElementById('inv-plat-sel').value;
-  const monto  = parseFloat(document.getElementById('inv-monto-inp').value) || 0;
-  const fecha  = document.getElementById('inv-fecha-inp').value;
-  const tasa   = parseFloat(document.getElementById('inv-tasa-inp').value);
+  const platId   = document.getElementById('inv-plat-sel').value;
+  const monto    = parseFloat(document.getElementById('inv-monto-inp').value) || 0;
+  const fecha    = document.getElementById('inv-fecha-inp').value;
+  const fechaFin = document.getElementById('inv-fecha-fin-inp').value;
+  const tasa     = parseFloat(document.getElementById('inv-tasa-inp').value);
   if (!monto) { showToast('⚠️ Ingresa un monto'); return; }
-  myPortafolio.push({ platId, monto, fecha, tasa });
+  myPortafolio.push({ platId, monto, fecha, fechaFin, tasa });
   localStorage.setItem('fsPortafolio', JSON.stringify(myPortafolio));
   document.getElementById('add-inv-form').style.display = 'none';
   renderPortafolio();
@@ -4993,15 +5507,75 @@ function showInvPanel(id, btn) {
     document.querySelectorAll('.inv-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
   }
-  if (id === 'calculadora') { calcRendimiento(); updateMultiCompare(); }
+  if (id === 'calculadora') {
+    initCalcDates();
+    renderCalcRows();
+    calcMulti();
+  }
   if (id === 'portafolio')  { renderPortafolio(); }
+}
+
+
+// ── Guardar cartera calculadora → portafolio ──
+function guardarCarteraEnPortafolio() {
+  if (!calcRows.length) return;
+  let agregadas = 0;
+  calcRows.forEach(row => {
+    if (!row.monto || row.monto <= 0) return;
+    // Buscar plataforma real o usar custom
+    const p = PLATFORMS.find(x => x.id === row.platId);
+    const platId = p ? row.platId : 'custom';
+    myPortafolio.push({
+      platId,
+      monto:    row.monto,
+      tasa:     row.tasa || (p ? p.rate : 0),
+      fecha:    row.ini ? row.ini + '-01' : new Date().toISOString().split('T')[0],
+      fechaFin: row.fin ? row.fin + '-01' : '',
+      // Guardar nombre personalizado si es custom
+      _nombre:  row.nombre || (p ? p.name : 'Inversión'),
+    });
+    agregadas++;
+  });
+  if (agregadas === 0) { showToast('⚠️ Ingresa al menos un monto mayor a $0'); return; }
+  try { localStorage.setItem('fsPortafolio', JSON.stringify(myPortafolio)); } catch(e) {}
+  showToast('💼 ' + agregadas + ' inversión' + (agregadas>1?'es':'') + ' agregada' + (agregadas>1?'s':'') + ' al portafolio');
+}
+
+// ── Guardar cartera calculadora → presupuesto (como ahorro mensual) ──
+function guardarCarteraEnPresupuesto() {
+  if (!calcRows.length) return;
+  let agregadas = 0;
+  calcRows.forEach(row => {
+    if (!row.monto || row.monto <= 0) return;
+    const p      = PLATFORMS.find(x => x.id === row.platId);
+    const nombre = row.nombre || (p ? p.name : 'Inversión');
+    const mesesRow = mesesEntre(row.ini, row.fin);
+    // Determinar en qué mes del año agregar (mes de inicio → índice)
+    let targetMonth = currentMonth >= 0 ? currentMonth : 0;
+    if (row.ini) {
+      const [, im] = row.ini.split('-').map(Number);
+      targetMonth = Math.min(im - 1, 11);
+    }
+    allData[targetMonth].ahorro.push({
+      label: nombre + (row.tasa ? ' (' + row.tasa + '%)' : ''),
+      est:   row.monto,
+      real:  0,
+    });
+    agregadas++;
+  });
+  if (agregadas === 0) { showToast('⚠️ Ingresa al menos un monto mayor a $0'); return; }
+  saveData();
+  renderPresupuesto();
+  updateDashboard();
+  showToast('📋 ' + agregadas + ' inversión' + (agregadas>1?'es':'') + ' agregada' + (agregadas>1?'s':'') + ' al presupuesto');
 }
 
 // ── INIT INVERSIONES ──
 renderPlatforms();
 populateCalcPlatformSelect();
 populatePortafolioSelect();
-calcRendimiento();
+initCalcDates();
+renderCalcRows();
 
 // ═══════════════════════════════════════════
 // INIT
