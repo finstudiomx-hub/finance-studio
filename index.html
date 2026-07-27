@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="google-adsense-account" content="ca-pub-8357102612227215">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Finance Studio — Administra tu presupuesto, inversiones, hipoteca y retiro. Calculadoras financieras para México con datos reales.">
 <meta name="keywords" content="finanzas personales mexico, presupuesto, AFORE, inversiones, hipoteca, CETES, Nu, retiro">
@@ -1204,7 +1205,7 @@
       <div class="topbar">
         <div>
           <div class="page-title">Dashboard</div>
-          <div class="page-subtitle">Resumen financiero · <span id="dash-mes">Enero 2026</span></div>
+          <div class="page-subtitle">Resumen financiero · <span id="dash-mes">Enero 2026</span> &nbsp;·&nbsp; <span id="dash-avg-badge" style="font-size:11px;padding:2px 8px;border-radius:6px;background:rgba(96,165,250,0.1);color:var(--accent2)">Promedio anual: calculando...</span></div>
         </div>
         <div class="topbar-actions">
           <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
@@ -1394,6 +1395,7 @@
           <div class="page-subtitle">Regla de las tres categorías · <span id="pres-mes-label">Enero 2026</span></div>
         </div>
         <div class="topbar-actions">
+          <button class="btn btn-ghost" onclick="copyFromPrevMonth()" id="btn-copy-prev" style="display:none">📋 Copiar mes anterior</button>
           <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir PDF</button>
           <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
         </div>
@@ -2551,7 +2553,7 @@ function loadStorage() {
 let allData = loadStorage();
 
 function saveData() {
-  try { localStorage.setItem('financeStudio2026', JSON.stringify(allData)); } catch(e) { showToast('⚠️ No se pudo guardar (almacenamiento lleno)'); }
+  try { localStorage.setItem('financeStudio2026', JSON.stringify(allData)); calcAverages(); } catch(e) { showToast('⚠️ No se pudo guardar (almacenamiento lleno)'); }
   showToast('💾 Guardado correctamente');
 }
 
@@ -2575,6 +2577,86 @@ function comingSoon(name) {
 // ═══════════════════════════════════════════
 // MONTH SELECTOR
 // ═══════════════════════════════════════════
+
+// ── PROMEDIO ANUAL ──
+function calcAverages() {
+  let months = [];
+  MONTHS.forEach((_, i) => {
+    const d = allData[i];
+    const ingEst = sum(d.ingresos, 'est');
+    // Considera "con datos" si hay al menos algún ingreso estimado
+    if (ingEst > 0) {
+      months.push({
+        ing: ingEst,
+        fij: sumM(d.fijosInd,'est') + sumM(d.fijosNoi,'est'),
+        aho: sum(d.ahorro,'est'),
+        vid: sumM(d.vida,'est'),
+      });
+    }
+  });
+
+  const row = document.getElementById('avg-row');
+  const badge = document.getElementById('dash-avg-badge');
+
+  if (months.length === 0) {
+    if (row)   row.style.display = 'none';
+    if (badge) badge.textContent = 'Sin datos anuales aún';
+    return;
+  }
+
+  const n   = months.length;
+  const avg = key => Math.round(months.reduce((s,m) => s + m[key], 0) / n);
+  const aIng = avg('ing'), aFij = avg('fij'), aAho = avg('aho'), aVid = avg('vid');
+  const aBal = aIng - aFij - aAho - aVid;
+
+  if (row)   row.style.display = 'block';
+  if (badge) badge.textContent = `Promedio ${n} mes${n>1?'es':''} con datos`;
+
+  setText('avg-meses-count', n + '');
+  setText('avg-ing', fmt(aIng));
+  setText('avg-fij', fmt(aFij));
+  setText('avg-aho', fmt(aAho));
+  setText('avg-vid', fmt(aVid));
+  const balEl = document.getElementById('avg-bal');
+  if (balEl) {
+    balEl.textContent = fmt(aBal);
+    balEl.style.color = aBal >= 0 ? 'var(--accent)' : 'var(--danger)';
+  }
+}
+
+// ── COPIAR MES ANTERIOR ──
+function copyFromPrevMonth() {
+  if (currentMonth === 0) {
+    showToast('⚠️ Enero es el primer mes — no hay mes anterior');
+    return;
+  }
+  const prev = allData[currentMonth - 1];
+  const curr = allData[currentMonth];
+
+  // Copia profunda de todos los conceptos manteniendo real en 0
+  curr.ingresos = prev.ingresos.map(r => ({ ...r, real: 0 }));
+  curr.fijosInd = prev.fijosInd.map(r => ({ ...r, real: 0 }));
+  curr.fijosNoi = prev.fijosNoi.map(r => ({ ...r, real: 0 }));
+  curr.ahorro   = prev.ahorro.map(r =>   ({ ...r, real: 0 }));
+  curr.vida     = prev.vida.map(r =>     ({ ...r, real: 0 }));
+
+  saveData();
+  renderPresupuesto();
+  updateDashboard();
+  showToast('📋 Copiado desde ' + MONTHS[currentMonth - 1]);
+}
+
+// ── Mostrar/ocultar botón copiar según mes ──
+function updateCopyBtn() {
+  const btn = document.getElementById('btn-copy-prev');
+  if (!btn) return;
+  // Mostrar si no es enero
+  btn.style.display = currentMonth > 0 ? 'inline-flex' : 'none';
+  if (currentMonth > 0) {
+    btn.textContent = '📋 Copiar de ' + MONTHS[currentMonth - 1].slice(0,3);
+  }
+}
+
 function buildMonthBars() {
   ['dash','pres'].forEach(prefix => {
     const bar = document.getElementById('month-bar-' + prefix);
@@ -2595,6 +2677,8 @@ function switchMonth() {
   document.getElementById('pres-mes-label').textContent = MONTHS[currentMonth] + ' ' + YEAR;
   renderPresupuesto();
   updateDashboard();
+  calcAverages();
+  updateCopyBtn();
 }
 
 // ═══════════════════════════════════════════
@@ -2749,7 +2833,7 @@ function renderGenericRows(containerId, rows, d, onDelete, hasFreq) {
     if (hasFreq) {
       const sel = document.createElement('select');
       sel.className = 'freq-select';
-      ['Mensual','Quincenal','Semanal','Anual','Variable'].forEach(f => {
+      ['Mensual','Quincenal','Semanal','Semestral','Anual','Variable'].forEach(f => {
         const opt = document.createElement('option');
         opt.value = f; opt.textContent = f;
         if (row.freq === f) opt.selected = true;
@@ -2841,20 +2925,39 @@ function addRow(section) {
 // ═══════════════════════════════════════════
 // RECALCULATE
 // ═══════════════════════════════════════════
+
+// ── Convierte monto según frecuencia a equivalente MENSUAL ──
+function toMonthly(amount, freq) {
+  switch((freq||'Mensual').toLowerCase()) {
+    case 'anual':      return amount / 12;
+    case 'semestral':  return amount / 6;
+    case 'quincenal':  return amount * 2;
+    case 'semanal':    return amount * 4.33;
+    case 'mensual':
+    case 'variable':
+    default:           return amount;
+  }
+}
+
+// ── sum con conversión de frecuencia ──
+function sumM(arr, key) {
+  return arr.reduce((s, r) => s + toMonthly(r[key] || 0, r.freq), 0);
+}
+
 function sum(arr, key) { return arr.reduce((s, r) => s + (r[key] || 0), 0); }
 
 function recalcAll(d) {
   const ingEst  = sum(d.ingresos, 'est');
   const ingReal = sum(d.ingresos, 'real');
 
-  const fijEst  = sum(d.fijosInd, 'est')  + sum(d.fijosNoi, 'est');
-  const fijReal = sum(d.fijosInd, 'real') + sum(d.fijosNoi, 'real');
+  const fijEst  = sumM(d.fijosInd, 'est')  + sumM(d.fijosNoi, 'est');
+  const fijReal = sumM(d.fijosInd, 'real') + sumM(d.fijosNoi, 'real');
 
   const ahoEst  = sum(d.ahorro, 'est');
   const ahoReal = sum(d.ahorro, 'real');
 
-  const vidEst  = sum(d.vida, 'est');
-  const vidReal = sum(d.vida, 'real');
+  const vidEst  = sumM(d.vida, 'est');
+  const vidReal = sumM(d.vida, 'real');
 
   const gasEst  = fijEst  + ahoEst  + vidEst;
   const gasReal = fijReal + ahoReal + vidReal;
@@ -2951,12 +3054,12 @@ function loadMetas() {
 function updateDashboard() {
   const d = allData[currentMonth];
   const ingEst  = sum(d.ingresos, 'est');
-  const fijEst  = sum(d.fijosInd, 'est') + sum(d.fijosNoi, 'est');
+  const fijEst  = sumM(d.fijosInd, 'est') + sumM(d.fijosNoi, 'est');
   const ahoEst  = sum(d.ahorro, 'est');
-  const vidEst  = sum(d.vida, 'est');
-  const fijReal = sum(d.fijosInd, 'real') + sum(d.fijosNoi, 'real');
+  const vidEst  = sumM(d.vida, 'est');
+  const fijReal = sumM(d.fijosInd, 'real') + sumM(d.fijosNoi, 'real');
   const ahoReal = sum(d.ahorro, 'real');
-  const vidReal = sum(d.vida, 'real');
+  const vidReal = sumM(d.vida, 'real');
 
   const metas = getMetas();
 
@@ -4651,6 +4754,8 @@ initTheme();
 buildMonthBars();
 loadMetas();
 initFechaBadges();
+calcAverages();
+updateCopyBtn();
 renderPresupuesto();
 updateDashboard();
 </script>
