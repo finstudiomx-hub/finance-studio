@@ -1240,6 +1240,7 @@
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8357102612227215"
      crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -1286,7 +1287,24 @@
       </div>
     </div>
     <div class="sidebar-footer">
-      v0.1 · <a href="https://github.com/finstudiomx-hub/finance-studio" target="_blank" style="color:var(--muted);text-decoration:none;font-size:10px">GitHub</a>
+      <a href="https://finstudio1.gumroad.com/l/haicig" target="_blank" id="link-premium"
+        style="display:block;background:linear-gradient(135deg,#16A34A,#2563EB);color:#fff;
+               text-decoration:none;border-radius:8px;padding:8px 10px;text-align:center;
+               font-size:11px;font-weight:700;margin-bottom:8px;letter-spacing:0.3px;
+               transition:opacity 0.15s" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=1">
+        🚀 Versión Premium — $99 MXN
+      </a>
+      <a href="https://buymeacoffee.com/finstudiomx" target="_blank"
+        style="display:flex;align-items:center;justify-content:center;gap:6px;
+               background:#FFDD00;color:#000;text-decoration:none;border-radius:8px;
+               padding:7px 10px;font-size:11px;font-weight:700;margin-bottom:6px;
+               transition:opacity 0.15s" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+        ☕ Invítame un café
+      </a>
+      <div style="font-size:10px;color:var(--muted);text-align:center">
+        v0.1 · <a href="https://github.com/finstudiomx-hub/finance-studio" target="_blank"
+        style="color:var(--muted);text-decoration:none">GitHub</a>
+      </div>
     </div>
   </nav>
 
@@ -1303,6 +1321,17 @@
         <div class="topbar-actions">
           <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir</button>
         </div>
+      </div>
+
+      <!-- Barra de acciones Excel -->
+      <div id="excel-bar" style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+        <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;flex-shrink:0">📊 Excel</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">
+          <button class="btn btn-ghost" style="font-size:12px" onclick="exportarExcel()">⬇️ Descargar Excel</button>
+          <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('excel-file-input').click()">📂 Cargar Excel</button>
+          <input type="file" id="excel-file-input" accept=".xlsx" style="display:none" onchange="importarExcel(this)">
+        </div>
+        <div id="excel-status" style="font-size:11px;color:var(--muted);font-style:italic"></div>
       </div>
 
       <!-- Tab bar: Anual + 12 meses -->
@@ -1399,6 +1428,22 @@
               <tbody id="tabla-resumen-anual"></tbody>
             </table>
           </div>
+        </div>
+
+        <!-- Promo premium -->
+        <div style="margin-top:4px;background:linear-gradient(135deg,rgba(22,163,74,0.08),rgba(37,99,235,0.08));
+                    border:1px solid rgba(22,163,74,0.2);border-radius:12px;padding:14px 18px;
+                    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text)">🚀 Finance Studio Premium</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px">Sin anuncios · Excel automático · Hipoteca · AFORE · Retiro · Funciona offline</div>
+          </div>
+          <a href="https://finstudio1.gumroad.com/l/haicig" target="_blank" id="link-premium-dash"
+            style="background:linear-gradient(135deg,#16A34A,#2563EB);color:#fff;
+                   text-decoration:none;border-radius:8px;padding:9px 18px;
+                   font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0">
+            Obtener por $99 MXN →
+          </a>
         </div>
       </div>
 
@@ -1578,8 +1623,9 @@
         </div>
         <div class="topbar-actions">
           <button class="btn btn-ghost" onclick="copyFromPrevMonth()" id="btn-copy-prev" style="display:none">📋 Copiar mes anterior</button>
+          <button class="btn btn-ghost" onclick="exportarExcel()">📊 Descargar Excel</button>
           <button class="btn btn-ghost" onclick="window.print()">🖨 Imprimir PDF</button>
-          <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
+          <button class="btn btn-primary" onclick="saveData(true)">💾 Guardar</button>
         </div>
       </div>
 
@@ -1870,39 +1916,60 @@
                 </label>
               </div>
               <div id="br-abono-fields" style="display:none">
+                <!-- Fuente del abono -->
+                <div style="margin-bottom:14px">
+                  <div class="field-label">Fuente del abono extra</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+                      <input type="radio" name="br-abono-tipo" value="capital" onchange="brCalc()" style="accent-color:var(--accent)"> 💰 Ya lo tengo
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+                      <input type="radio" name="br-abono-tipo" value="mensual" onchange="brCalc()" style="accent-color:var(--accent)"> 📅 Ahorro mensual
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+                      <input type="radio" name="br-abono-tipo" value="anual" checked onchange="brCalc()" style="accent-color:var(--accent)"> 📆 Ingreso anual
+                    </label>
+                  </div>
+                </div>
+
                 <div class="br-form-grid" style="margin-bottom:12px">
+                  <!-- Capital disponible (solo si tipo = capital) -->
+                  <div id="br-abono-capital-wrap">
+                    <div class="field-label">Capital disponible ($)</div>
+                    <input class="field-input" type="number" id="br-abono-capital" value="0" min="0" step="1000" oninput="brCalc()">
+                    <div class="field-hint">Monto que ya tienes para abonar</div>
+                  </div>
+                  <!-- Ahorro mensual (si tipo = mensual) -->
+                  <div id="br-abono-mensual-wrap">
+                    <div class="field-label">Ahorro mensual para abonar ($)</div>
+                    <input class="field-input" type="number" id="br-abono-mensual" value="0" min="0" step="500" oninput="brCalc()">
+                    <div class="field-hint">Se acumula hasta abonar</div>
+                  </div>
+                  <!-- Monto anual (todos los tipos lo usan) -->
                   <div>
-                    <div class="field-label">Abono anual a capital ($)</div>
+                    <div class="field-label">Monto extra anual ($)</div>
                     <input class="field-input" type="number" id="br-abono-monto" value="50000" min="0" step="1000" oninput="brCalc()">
-                    <div class="field-hint">Monto extra que pagas al año</div>
+                    <div class="field-hint">Abono total por año (aguinaldo, bono…)</div>
                   </div>
                   <div>
                     <div class="field-label">¿En qué mes del año?</div>
                     <select class="field-input" id="br-abono-mes" onchange="brCalc()">
-                      <option value="1">Enero (mes 1)</option>
-                      <option value="2">Febrero (mes 2)</option>
-                      <option value="3">Marzo (mes 3)</option>
-                      <option value="4">Abril (mes 4)</option>
-                      <option value="5">Mayo (mes 5)</option>
-                      <option value="6" selected>Junio (mes 6)</option>
-                      <option value="7">Julio (mes 7)</option>
-                      <option value="8">Agosto (mes 8)</option>
-                      <option value="9">Septiembre (mes 9)</option>
-                      <option value="10">Octubre (mes 10)</option>
-                      <option value="11">Noviembre (mes 11)</option>
-                      <option value="12">Diciembre (mes 12 / aguinaldo)</option>
+                      <option value="1">Enero</option><option value="2">Febrero</option>
+                      <option value="3">Marzo</option><option value="4">Abril</option>
+                      <option value="5">Mayo</option><option value="6">Junio</option>
+                      <option value="7">Julio</option><option value="8">Agosto</option>
+                      <option value="9">Septiembre</option><option value="10">Octubre</option>
+                      <option value="11">Noviembre</option>
+                      <option value="12" selected>Diciembre (aguinaldo)</option>
                     </select>
-                    <div class="field-hint">Típico: diciembre (aguinaldo) o mes de bono</div>
                   </div>
                   <div>
                     <div class="field-label">¿A partir de qué año?</div>
                     <input class="field-input" type="number" id="br-abono-desde" value="1" min="1" step="1" oninput="brCalc()">
-                    <div class="field-hint">1 = desde el primer año</div>
                   </div>
                   <div>
                     <div class="field-label">¿Hasta qué año?</div>
                     <input class="field-input" type="number" id="br-abono-hasta" value="20" min="1" step="1" oninput="brCalc()">
-                    <div class="field-hint">Usa el mismo plazo si es indefinido</div>
                   </div>
                 </div>
                 <!-- Savings summary -->
@@ -2626,6 +2693,7 @@
 
 <div class="toast" id="toast">💾 Guardado correctamente</div>
 
+
 <script>
 
 // ── SECURITY: sanitize user text before injecting into HTML ──
@@ -2696,9 +2764,22 @@ function loadStorage() {
 
 let allData = loadStorage();
 
-function saveData() {
-  try { localStorage.setItem('financeStudio2026', JSON.stringify(allData)); calcAverages(); } catch(e) { showToast('⚠️ No se pudo guardar (almacenamiento lleno)'); }
-  showToast('💾 Guardado correctamente');
+// isPremium — cambiar a true en la versión de pago
+const IS_PREMIUM = false;
+
+function saveData(autoExport) {
+  try {
+    localStorage.setItem('financeStudio2026', JSON.stringify(allData));
+    calcAverages();
+    const msg = IS_PREMIUM && autoExport ? '💾 Guardado · exportando Excel...' : '💾 Guardado correctamente';
+    showToast(msg);
+    // En versión premium: auto-exportar Excel al guardar
+    if (IS_PREMIUM && autoExport && typeof XLSX !== 'undefined') {
+      setTimeout(() => exportarExcel(), 500);
+    }
+  } catch(e) {
+    showToast('⚠️ No se pudo guardar (almacenamiento lleno)');
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -3682,7 +3763,9 @@ function simularAmort(credito, tasaMes, mensual, plazoMeses, abono) {
 
     // Abono extra a capital
     let abonoEstemes = 0;
-    if (abono && mesDelAnio === abono.mes && anio >= abono.desde && anio <= abono.hasta && saldo > 0) {
+    const esMesAbono = abono && mesDelAnio === abono.mes && anio >= abono.desde && anio <= abono.hasta && saldo > 0;
+    const yaAbonado  = abono?.soloUnaVez && m > 12; // capital: solo en año 1
+    if (esMesAbono && !yaAbonado) {
       abonoEstemes = Math.min(abono.monto, saldo);
       saldo -= abonoEstemes;
       capAcum += abonoEstemes;
@@ -4450,7 +4533,7 @@ function mesesEntre(ini, fin) {
 }
 
 let calcRows = [
-  { platId:'custom', nombre:'Mi inversión', monto:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true },
+  { platId:'custom', nombre:'Mi inversión', capitalIni:0, aportMensual:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true },
 ];
 
 function initCalcDates() { /* ya inicializado en calcRows */ }
@@ -4497,13 +4580,21 @@ function renderCalcRows() {
           <button class="del-btn" style="color:var(--muted);font-size:18px" title="Quitar" onclick="removeCalcRow(${i})">✕</button>
         </div>
       </div>
-      <!-- Fila 2: monto, tasa, inicio, fin, reinversión -->
-      <div style="display:grid;grid-template-columns:130px 90px 120px 120px 1fr;gap:8px;align-items:end">
+      <!-- Fila 2: capital, aportación, tasa, inicio, fin, reinversión -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 90px 120px 120px 1fr;gap:8px;align-items:end;margin-top:2px">
         <div>
-          <div class="field-label">Monto ($)</div>
+          <div class="field-label">💰 Capital inicial ($)</div>
           <input type="number" class="field-input" style="font-size:13px;padding:7px 10px;text-align:right"
-            value="${row.monto||''}" min="0" placeholder="0"
-            oninput="calcRows[${i}].monto=parseFloat(this.value)||0">
+            value="${row.capitalIni||''}" min="0" placeholder="Ya lo tienes"
+            oninput="calcRows[${i}].capitalIni=parseFloat(this.value)||0">
+          <div class="field-hint">Lo que ya tienes ahorrado</div>
+        </div>
+        <div>
+          <div class="field-label">📅 Aportación mensual ($)</div>
+          <input type="number" class="field-input" style="font-size:13px;padding:7px 10px;text-align:right"
+            value="${row.aportMensual||''}" min="0" placeholder="0 si no aportas"
+            oninput="calcRows[${i}].aportMensual=parseFloat(this.value)||0">
+          <div class="field-hint">Lo que metes cada mes</div>
         </div>
         <div>
           <div class="field-label">Tasa (%)</div>
@@ -4524,11 +4615,11 @@ function renderCalcRows() {
             oninput="calcRows[${i}].fin=this.value">
         </div>
         <div>
-          <div class="field-label">Reinversión · <span style="color:var(--accent);font-family:var(--mono)">${mesesRow} mes${mesesRow!==1?'es':''}</span></div>
+          <div class="field-label">Reinversión · <span style="color:var(--accent);font-family:var(--mono)">${mesesRow}m</span></div>
           <select class="field-input" style="font-size:12px;padding:7px 10px"
             onchange="calcRows[${i}].reinv=this.value==='1'">
-            <option value="1" ${row.reinv?'selected':''}>Sí — interés compuesto</option>
-            <option value="0" ${!row.reinv?'selected':''}>No — interés simple</option>
+            <option value="1" ${row.reinv?'selected':''}>Sí — compuesto</option>
+            <option value="0" ${!row.reinv?'selected':''}>No — simple</option>
           </select>
         </div>
       </div>
@@ -4538,7 +4629,7 @@ function renderCalcRows() {
 }
 
 function addCalcRow() {
-  calcRows.push({ platId:'custom', nombre:'Mi inversión', monto:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true });
+  calcRows.push({ platId:'custom', nombre:'Mi inversión', capitalIni:0, aportMensual:0, tasa:0, ini:mesActual(), fin:mesOffset(mesActual(),12), reinv:true });
   renderCalcRows();
 }
 
@@ -4553,25 +4644,29 @@ function calcMulti() {
 
   // Calcular por fila con sus propios parámetros
   const rows = calcRows.map(row => {
-    const p     = PLATFORMS.find(x => x.id === row.platId) || PLATFORMS[0];
-    const tasa  = row.tasa  || p.rate;
-    const monto = row.monto || 0;
-    const meses = mesesEntre(row.ini, row.fin);
-    const reinv = row.reinv;
-    const rM    = tasa / 100 / 12;
-    let ganancia;
-    if (meses <= 0) ganancia = 0;
-    else if (reinv) ganancia = monto * Math.pow(1 + rM, meses) - monto;
-    else            ganancia = monto * (tasa / 100) * (meses / 12);
-    const mensual = meses > 0 ? ganancia / meses : 0;
-    const total   = monto + ganancia;
-    const nombre = row.nombre || p?.name || 'Inversión';
-    return { p, nombre, tasa, monto, meses, reinv, ganancia, mensual, total, ini: row.ini, fin: row.fin };
+    const p            = PLATFORMS.find(x => x.id === row.platId) || PLATFORMS[0];
+    const tasa         = row.tasa         || 0;
+    const capitalIni   = row.capitalIni   || 0;
+    const aportMensual = row.aportMensual || 0;
+    const meses        = mesesEntre(row.ini, row.fin);
+    const reinv        = row.reinv;
+    const rM           = tasa / 100 / 12;
+    // Simular mes a mes: saldo crece con aportaciones + interés
+    let saldo = capitalIni;
+    for (let m = 0; m < meses; m++) {
+      if (reinv) saldo = saldo * (1 + rM) + aportMensual;
+      else       saldo = saldo + capitalIni * rM + aportMensual;
+    }
+    const totalAportado = capitalIni + aportMensual * meses;
+    const ganancia      = Math.max(0, saldo - totalAportado);
+    const mensualGan    = meses > 0 ? ganancia / meses : 0;
+    const nombre        = row.nombre || p?.name || 'Inversión';
+    return { p, nombre, tasa, capitalIni, aportMensual, monto: totalAportado, meses, reinv, ganancia, mensualGan, total: saldo, ini: row.ini, fin: row.fin };
   });
 
   const totMonto    = rows.reduce((s,r) => s + r.monto, 0);
   const totGanancia = rows.reduce((s,r) => s + r.ganancia, 0);
-  const totMensual  = rows.reduce((s,r) => s + r.mensual, 0);
+  const totMensual  = rows.reduce((s,r) => s + r.mensualGan, 0);
   const totTotal    = rows.reduce((s,r) => s + r.total, 0);
 
   // Mostrar resultados
@@ -4646,21 +4741,26 @@ function calcMulti() {
   }
 
   tmBody.innerHTML = mesesList.map(mes => {
+    // Calcular saldo total (capital + aportaciones + ganancia) para cada fila en este mes
     const cols = rows.map(r => {
-      // Solo calcular si este mes está dentro del rango de la fila
-      if (!r.ini || !r.fin || mes.ym <= r.ini || mes.ym > r.fin) return 0;
-      const mesesRowActual = mesesEntre(r.ini, mes.ym);
-      if (mesesRowActual <= 0) return 0;
-      const rM = r.tasa / 100 / 12;
-      if (r.reinv) return r.monto * Math.pow(1 + rM, mesesRowActual) - r.monto;
-      else         return r.monto * (r.tasa / 100) * (mesesRowActual / 12);
+      if (!r.ini || !r.fin || mes.ym <= r.ini || mes.ym > r.fin) return { gan: 0, saldo: 0 };
+      const mesesM = mesesEntre(r.ini, mes.ym);
+      if (mesesM <= 0) return { gan: 0, saldo: 0 };
+      const rM2 = r.tasa / 100 / 12;
+      let saldo = r.capitalIni;
+      for (let m = 0; m < mesesM; m++) {
+        if (r.reinv) saldo = saldo * (1 + rM2) + r.aportMensual;
+        else         saldo = saldo + r.capitalIni * rM2 + r.aportMensual;
+      }
+      const aportado = r.capitalIni + r.aportMensual * mesesM;
+      return { gan: saldo - aportado, saldo };
     });
-    const totalGan  = cols.reduce((s,v) => s+v, 0);
-    const totalAcum = totMonto + totalGan;
+    const totalGan  = cols.reduce((s,v) => s + v.gan, 0);
+    const totalAcum = rows.reduce((s,r) => s + r.capitalIni, 0) + rows.reduce((s,r) => s + r.aportMensual, 0) * mes.i + totalGan;
     const isLast    = mes.i === globalMeses;
     return `<tr ${isLast?'style="font-weight:600"':''}>
       <td style="font-family:var(--sans);color:var(--muted)">${mes.label}</td>
-      ${cols.map(v => `<td style="color:${v>0?'var(--accent)':'var(--muted)'}">${v>0?fmt(v):'—'}</td>`).join('')}
+      ${cols.map(v => `<td style="color:${v.gan>0?'var(--accent)':'var(--muted)'}">${v.gan>0?fmt(v.gan):'—'}</td>`).join('')}
       <td style="color:var(--accent);font-weight:600">${fmt(totalGan)}</td>
       <td>${fmt(totalAcum)}</td>
     </tr>`;
@@ -5521,13 +5621,12 @@ function guardarCarteraEnPortafolio() {
   if (!calcRows.length) return;
   let agregadas = 0;
   calcRows.forEach(row => {
-    if (!row.monto || row.monto <= 0) return;
-    // Buscar plataforma real o usar custom
+    if ((!row.capitalIni || row.capitalIni <= 0) && (!row.aportMensual || row.aportMensual <= 0)) return;
     const p = PLATFORMS.find(x => x.id === row.platId);
     const platId = p ? row.platId : 'custom';
     myPortafolio.push({
       platId,
-      monto:    row.monto,
+      monto:    row.capitalIni || 0,
       tasa:     row.tasa || (p ? p.rate : 0),
       fecha:    row.ini ? row.ini + '-01' : new Date().toISOString().split('T')[0],
       fechaFin: row.fin ? row.fin + '-01' : '',
@@ -5546,21 +5645,28 @@ function guardarCarteraEnPresupuesto() {
   if (!calcRows.length) return;
   let agregadas = 0;
   calcRows.forEach(row => {
-    if (!row.monto || row.monto <= 0) return;
+    if ((!row.capitalIni || row.capitalIni <= 0) && (!row.aportMensual || row.aportMensual <= 0)) return;
     const p      = PLATFORMS.find(x => x.id === row.platId);
     const nombre = row.nombre || (p ? p.name : 'Inversión');
-    const mesesRow = mesesEntre(row.ini, row.fin);
-    // Determinar en qué mes del año agregar (mes de inicio → índice)
     let targetMonth = currentMonth >= 0 ? currentMonth : 0;
     if (row.ini) {
       const [, im] = row.ini.split('-').map(Number);
       targetMonth = Math.min(im - 1, 11);
     }
-    allData[targetMonth].ahorro.push({
-      label: nombre + (row.tasa ? ' (' + row.tasa + '%)' : ''),
-      est:   row.monto,
-      real:  0,
-    });
+    // Agregar capital inicial como ahorro único si > 0
+    if (row.capitalIni > 0) {
+      allData[targetMonth].ahorro.push({
+        label: nombre + ' — capital inicial',
+        est:   row.capitalIni, real: 0,
+      });
+    }
+    // Agregar aportación mensual si > 0
+    if (row.aportMensual > 0) {
+      allData[targetMonth].ahorro.push({
+        label: nombre + ' — aportación mensual' + (row.tasa ? ' (' + row.tasa + '%)' : ''),
+        est:   row.aportMensual, real: 0,
+      });
+    }
     agregadas++;
   });
   if (agregadas === 0) { showToast('⚠️ Ingresa al menos un monto mayor a $0'); return; }
@@ -5613,7 +5719,483 @@ function initTheme() {
 
 initTheme();
 
+// Al cargar: verificar si hay datos guardados, sino mostrar bienvenida
+(function initApp() {
+  const saved = localStorage.getItem('financeStudio2026');
+  if (!saved) {
+    const banner = document.createElement('div');
+    banner.id = 'welcome-banner';
+    banner.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:flex;align-items:center;justify-content:center;';
+    banner.innerHTML = `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:440px;width:90%;text-align:center">
+        <div style="font-size:36px;margin-bottom:12px">💰</div>
+        <div style="font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:8px;color:var(--text)">Bienvenido a Finance Studio</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6">¿Cómo quieres comenzar?</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary" style="padding:12px;font-size:14px" onclick="closeBanner()">
+            📋 Empezar desde cero
+          </button>
+          <button class="btn btn-ghost" style="padding:12px;font-size:14px"
+            onclick="document.getElementById('excel-file-input').click();closeBanner()">
+            📂 Cargar Excel existente
+          </button>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+          <a href="https://finstudio1.gumroad.com/l/haicig" target="_blank"
+            style="display:block;background:linear-gradient(135deg,#16A34A,#2563EB);
+                   color:#fff;text-decoration:none;border-radius:8px;padding:10px;
+                   font-size:12px;font-weight:700;text-align:center;margin-bottom:8px">
+            🚀 Descargar versión Premium — $99 MXN
+          </a>
+          <div style="font-size:10px;color:var(--muted);text-align:center">Sin anuncios · Excel automático · Hipoteca · AFORE · Retiro</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(banner);
+  }
+})();
+
+function closeBanner() {
+  const b = document.getElementById('welcome-banner');
+  if (b) b.remove();
+}
+
 currentMonth = -1;
+
+
+// ═══════════════════════════════════════════
+// GUMROAD — LINKS DE MONETIZACIÓN
+// ═══════════════════════════════════════════
+// Cuando tengas tu URL de Gumroad, reemplaza XXXXXXX con tu código
+const GUMROAD_PREMIUM = 'https://finstudio1.gumroad.com/l/haicig';
+const GUMROAD_GRATIS  = 'https://finstudio1.gumroad.com/l/haicig'; // ← reemplazar con link del Excel gratis
+
+// Actualizar todos los links al cargar
+function initGumroadLinks() {
+  document.querySelectorAll('[href*="gumroad.com/l/XXXXXXX"]').forEach(el => {
+    // El primero es gratis, el resto premium (heurística simple)
+    el.href = GUMROAD_PREMIUM;
+  });
+}
+
+// Descargar plantilla gratis desde Gumroad
+function descargarExcelGratis() {
+  window.open(GUMROAD_GRATIS, '_blank');
+}
+
+// ═══════════════════════════════════════════
+// EXCEL — EXPORTAR E IMPORTAR CON SheetJS
+// ═══════════════════════════════════════════
+
+// ── Paleta de colores para el Excel ──
+const XL = {
+  darkBg:    '0F1117', accent:  '16A34A', blue:    '2563EB',
+  pink:      'DB2777', warn:    'D97706', white:   'FFFFFF',
+  lightGray: 'F1F5F9', midGray: 'E2E8F0', textDark:'0F172A',
+  textMid:   '334155', muted:   '64748B', inputBg: 'EFF6FF',
+  inputFg:   '1D4ED8', greenBg: 'D1FAE5', blueBg:  'DBEAFE',
+  amberBg:   'FEF3C7', pinkBg:  'FCE7F3',
+};
+
+function xlFill(hex) {
+  return { type: 'pattern', pattern: 'solid', fgColor: { rgb: hex } };
+}
+function xlFont(bold, color, sz) {
+  return { name: 'Arial', bold: !!bold, color: { rgb: color||XL.textDark }, sz: sz||10 };
+}
+function xlBorder(color) {
+  const s = { style: 'thin', color: { rgb: color||'CBD5E1' } };
+  return { top: s, bottom: s, left: s, right: s };
+}
+function xlAlign(h, v) {
+  return { horizontal: h||'left', vertical: v||'center', wrapText: false };
+}
+
+function setCellStyle(ws, addr, opts) {
+  if (!ws[addr]) ws[addr] = { v: '', t: 's' };
+  ws[addr].s = {};
+  if (opts.fill)   ws[addr].s.fill   = opts.fill;
+  if (opts.font)   ws[addr].s.font   = opts.font;
+  if (opts.border) ws[addr].s.border = opts.border;
+  if (opts.align)  ws[addr].s.alignment = opts.align;
+  if (opts.numFmt) ws[addr].s.numFmt = opts.numFmt;
+}
+
+function setCell(ws, row, col, value, opts) {
+  const addr = XLSX.utils.encode_cell({ r: row, c: col });
+  const t = (typeof value === 'number') ? 'n' : (typeof value === 'boolean') ? 'b' : 's';
+  ws[addr] = { v: value ?? '', t };
+  if (opts) setCellStyle(ws, addr, opts);
+}
+
+// ── EXPORTAR ──
+function exportarExcel() {
+  if (typeof XLSX === 'undefined') {
+    showToast('⚠️ SheetJS no cargó, intenta recargar la página');
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const mesesConDatos = MONTHS.filter((_, i) => sum(allData[i].ingresos, 'est') > 0);
+  const esGratis = true; // Versión gratuita: sin inversiones/bienes/retiro en hojas separadas
+
+  // ── HOJA 1: RESUMEN ANUAL ──
+  const wsR = {};
+  const rangeR = { s: { r: 0, c: 0 }, e: { r: 100, c: 8 } };
+
+  // Header
+  const headerStyle = { fill: xlFill(XL.darkBg), font: xlFont(true, XL.accent, 14), align: xlAlign('center') };
+  setCell(wsR, 0, 0, 'FINANCE STUDIO — RESUMEN ANUAL 2026', headerStyle);
+  wsR['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:7} }];
+
+  // Subtítulo
+  setCell(wsR, 1, 0, 'Exportado: ' + new Date().toLocaleDateString('es-MX'), { font: xlFont(false, XL.muted, 9), align: xlAlign('center') });
+  wsR['!merges'].push({ s:{r:1,c:0}, e:{r:1,c:7} });
+
+  // Columnas del resumen
+  const colHeaders = ['Mes','Ingresos','Gastos Fijos','Ahorro','Estilo de Vida','Gastos Totales','Balance','% Ahorro'];
+  colHeaders.forEach((h, c) => {
+    setCell(wsR, 3, c, h, { fill: xlFill(XL.textDark), font: xlFont(true, XL.white, 9), align: xlAlign('center'), border: xlBorder() });
+  });
+
+  let totalIng=0, totalFij=0, totalAho=0, totalVid=0;
+  MONTHS.forEach((mes, i) => {
+    const d   = allData[i];
+    const ing = sum(d.ingresos, 'est');
+    const fij = sumM(d.fijosInd,'est') + sumM(d.fijosNoi,'est');
+    const aho = sum(d.ahorro, 'est');
+    const vid = sumM(d.vida, 'est');
+    const gas = fij + aho + vid;
+    const bal = ing - gas;
+    const pctAho = ing > 0 ? aho/ing : 0;
+    const hasData = ing > 0;
+    const bg = hasData ? (i%2===0 ? XL.white : XL.lightGray) : 'F8F8F8';
+    const fgColor = hasData ? XL.textDark : XL.muted;
+    const r = i + 4;
+    totalIng+=ing; totalFij+=fij; totalAho+=aho; totalVid+=vid;
+    [mes, ing, fij, aho, vid, gas, bal, pctAho].forEach((v, c) => {
+      const isNum = c > 0;
+      const numFmt = c === 7 ? '0.0%' : c > 0 ? '$#,##0' : '@';
+      const color = c === 6 ? (bal>=0?XL.accent:'DC2626') : c === 7 ? XL.warn : fgColor;
+      setCell(wsR, r, c, v, {
+        fill: xlFill(bg),
+        font: xlFont(false, hasData ? color : XL.muted, 10),
+        border: xlBorder(),
+        align: xlAlign(c===0?'left':'right'),
+        numFmt,
+      });
+    });
+  });
+
+  // Fila totales
+  const tr = 16;
+  const gasT = totalFij+totalAho+totalVid;
+  const balT = totalIng - gasT;
+  [['TOTAL AÑO', totalIng, totalFij, totalAho, totalVid, gasT, balT, totalAho/Math.max(totalIng,1)]].forEach(row => {
+    row.forEach((v, c) => {
+      setCell(wsR, tr, c, v, {
+        fill: xlFill(XL.darkBg),
+        font: xlFont(true, c===6?(balT>=0?XL.accent:'DC2626'):XL.white, 11),
+        border: xlBorder('334155'),
+        align: xlAlign(c===0?'left':'right'),
+        numFmt: c===7?'0.0%':c>0?'$#,##0':'@',
+      });
+    });
+  });
+
+  wsR['!ref'] = XLSX.utils.encode_range(rangeR);
+  wsR['!cols'] = [18,16,16,16,16,16,16,12].map(w => ({ wch: w }));
+  if (IS_PREMIUM) XLSX.utils.book_append_sheet(wb, wsR, 'Resumen Anual');
+
+  // ── HOJAS POR MES ──
+  MONTHS.forEach((mes, i) => {
+    const d = allData[i];
+    const ing = sum(d.ingresos,'est');
+    if (ing === 0 && sum(d.fijosInd,'est') === 0 && sum(d.ahorro,'est') === 0) return; // skip empty
+
+    const ws = {};
+    ws['!merges'] = [];
+    let r = 0;
+
+    const escribirSeccion = (titulo, rows, bgH, bgRow, cols, totEst, totReal) => {
+      // Header sección
+      setCell(ws, r, 0, titulo, { fill: xlFill(bgH), font: xlFont(true, XL.white, 10), align: xlAlign() });
+      ws['!merges'].push({ s:{r,c:0}, e:{r,c:4} });
+      r++;
+      // Col headers
+      cols.forEach((h,c) => setCell(ws, r, c, h, { fill: xlFill('1E293B'), font: xlFont(true, XL.white, 9), align: xlAlign(c===0?'left':'right'), border: xlBorder() }));
+      r++;
+      // Datos
+      rows.forEach((row, ri) => {
+        const bg = ri%2===0 ? XL.white : XL.lightGray;
+        setCell(ws, r, 0, row.label, { fill: xlFill(bg), font: xlFont(false, XL.textDark, 10), align: xlAlign(), border: xlBorder() });
+        setCell(ws, r, 1, row.est||0,  { fill: xlFill(XL.inputBg), font: xlFont(false, XL.inputFg, 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder() });
+        setCell(ws, r, 2, row.real||0, { fill: xlFill(XL.inputBg), font: xlFont(false, XL.inputFg, 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder() });
+        const diff = (row.real||0) - (row.est||0);
+        setCell(ws, r, 3, diff, { fill: xlFill(bg), font: xlFont(false, diff>=0?XL.accent:'DC2626', 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder() });
+        if (row.freq) setCell(ws, r, 4, row.freq, { fill: xlFill(bg), font: xlFont(false, XL.muted, 9), align: xlAlign('center'), border: xlBorder() });
+        r++;
+      });
+      // Total
+      setCell(ws, r, 0, 'TOTAL', { fill: xlFill(bgH), font: xlFont(true, XL.white, 10), align: xlAlign(), border: xlBorder('334155') });
+      setCell(ws, r, 1, totEst,  { fill: xlFill(bgH), font: xlFont(true, XL.white, 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+      setCell(ws, r, 2, totReal, { fill: xlFill(bgH), font: xlFont(true, XL.white, 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+      const diffT = totReal - totEst;
+      setCell(ws, r, 3, diffT,   { fill: xlFill(bgH), font: xlFont(true, diffT>=0?XL.greenBg:'FEE2E2', 10), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+      r += 2;
+    };
+
+    // Título mes
+    setCell(ws, r, 0, `PRESUPUESTO ${mes.toUpperCase()} 2026`, { fill: xlFill(XL.darkBg), font: xlFont(true, XL.accent, 14), align: xlAlign('center') });
+    ws['!merges'].push({ s:{r,c:0}, e:{r,c:4} });
+    r += 2;
+
+    // Ingresos
+    const ingEst  = sum(d.ingresos,'est');
+    const ingReal = sum(d.ingresos,'real');
+    escribirSeccion('💵 INGRESOS', d.ingresos, '166534', XL.greenBg,
+      ['Concepto','Estimado ($)','Real ($)','Diferencia',''], ingEst, ingReal);
+
+    // Gastos fijos
+    const fijEst  = sumM(d.fijosInd,'est')+sumM(d.fijosNoi,'est');
+    const fijReal = sumM(d.fijosInd,'real')+sumM(d.fijosNoi,'real');
+    escribirSeccion('🏠 GASTOS FIJOS (50%)', [...d.fijosInd,...d.fijosNoi], '1E3A8A', XL.blueBg,
+      ['Concepto','Estimado ($)','Real ($)','Diferencia','Frecuencia'], fijEst, fijReal);
+
+    // Ahorro
+    const ahoEst  = sum(d.ahorro,'est');
+    const ahoReal = sum(d.ahorro,'real');
+    escribirSeccion('🎯 AHORRO E INVERSIÓN (20%)', d.ahorro, '78350F', XL.amberBg,
+      ['Concepto','Estimado ($)','Real ($)','Diferencia',''], ahoEst, ahoReal);
+
+    // Vida
+    const vidEst  = sumM(d.vida,'est');
+    const vidReal = sumM(d.vida,'real');
+    escribirSeccion('✨ ESTILO DE VIDA (30%)', d.vida, '831843', XL.pinkBg,
+      ['Concepto','Estimado ($)','Real ($)','Diferencia','Frecuencia'], vidEst, vidReal);
+
+    // Balance final
+    const balEst  = ingEst  - fijEst  - ahoEst  - vidEst;
+    const balReal = ingReal - fijReal - ahoReal - vidReal;
+    setCell(ws, r, 0, '⚖️ BALANCE FINAL', { fill: xlFill(XL.darkBg), font: xlFont(true, XL.white, 11), align: xlAlign(), border: xlBorder('334155') });
+    ws['!merges'].push({ s:{r,c:0}, e:{r,c:0} });
+    setCell(ws, r, 1, balEst,  { fill: xlFill(XL.darkBg), font: xlFont(true, balEst>=0?XL.accent:'DC2626', 13), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+    setCell(ws, r, 2, balReal, { fill: xlFill(XL.darkBg), font: xlFont(true, balReal>=0?XL.accent:'DC2626', 13), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+    setCell(ws, r, 3, balReal-balEst, { fill: xlFill(XL.darkBg), font: xlFont(true, XL.white, 11), align: xlAlign('right'), numFmt: '$#,##0', border: xlBorder('334155') });
+    r++;
+
+    ws['!ref'] = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:r+5,c:5} });
+    ws['!cols'] = [28,14,14,14,14].map(w => ({ wch: w }));
+
+    // Nombre de hoja
+    const sheetName = mes.slice(0,3) + ' 2026';
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  });
+
+  // ── HOJAS EXTRA (solo en versión Premium) ──
+  // INVERSIONES
+  if (IS_PREMIUM && myPortafolio.length > 0) {
+    const wsI = {};
+    wsI['!merges'] = [];
+    let r = 0;
+    setCell(wsI, r, 0, '📈 MI PORTAFOLIO DE INVERSIONES', { fill: xlFill(XL.darkBg), font: xlFont(true, XL.accent, 13), align: xlAlign('center') });
+    wsI['!merges'].push({ s:{r,c:0}, e:{r,c:6} }); r += 2;
+    // Headers
+    ['Plataforma','Monto ($)','Tasa (%)','Fecha inicio','Fecha fin','Estado','Ganancia acum.'].forEach((h, c) => {
+      setCell(wsI, r, c, h, { fill: xlFill('1E293B'), font: xlFont(true, XL.white, 9), align: xlAlign('center'), border: xlBorder() });
+    }); r++;
+    myPortafolio.forEach((inv, i) => {
+      const p      = PLATFORMS.find(x => x.id === inv.platId) || { name: inv._nombre || inv.platId };
+      const tasa   = inv.tasa || p.rate || 0;
+      const inicio = inv.fecha    ? new Date(inv.fecha)    : new Date();
+      const fin    = inv.fechaFin ? new Date(inv.fechaFin) : null;
+      const hoy    = new Date();
+      const dias   = Math.max(0, Math.round((Math.min(fin||hoy, hoy) - inicio) / (1000*60*60*24)));
+      const gan    = inv.monto * (tasa/100) * (dias/365);
+      const estado = !fin ? 'Activo' : hoy > fin ? 'Vencido' : 'Vigente';
+      const bg     = i%2===0 ? XL.white : XL.lightGray;
+      [p.name, inv.monto, tasa, inv.fecha||'—', inv.fechaFin||'—', estado, Math.round(gan)].forEach((v, c) => {
+        setCell(wsI, r, c, v, {
+          fill: xlFill(bg), font: xlFont(false, c===5&&estado==='Activo'?XL.accent:c===6?XL.accent:XL.textDark, 10),
+          align: xlAlign(c===0?'left':'right'), border: xlBorder(),
+          numFmt: (c===1||c===6)?'$#,##0':c===2?'0.00"%"':undefined,
+        });
+      }); r++;
+    });
+    // Total
+    const totMonto = myPortafolio.reduce((s,inv) => s+(inv.monto||0), 0);
+    ['TOTAL', totMonto, '', '', '', '', ''].forEach((v, c) => {
+      setCell(wsI, r, c, v, { fill: xlFill(XL.darkBg), font: xlFont(true, c===1?XL.accent:XL.white, 10), align: xlAlign(c===0?'left':'right'), border: xlBorder('334155'), numFmt: c===1?'$#,##0':undefined });
+    });
+    wsI['!ref']  = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:r+1,c:7} });
+    wsI['!cols'] = [22,14,10,14,14,10,14].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, wsI, 'Inversiones');
+  }
+
+  // BIENES RAÍCES
+  if (IS_PREMIUM && myProps.length > 0) {
+    const wsBR = {};
+    wsBR['!merges'] = [];
+    let r = 0;
+    setCell(wsBR, r, 0, '🏠 MIS PROPIEDADES', { fill: xlFill(XL.darkBg), font: xlFont(true, XL.accent2||'2563EB', 13), align: xlAlign('center') });
+    wsBR['!merges'].push({ s:{r,c:0}, e:{r,c:7} }); r += 2;
+    ['Propiedad','Valor ($)','Crédito ($)','Tasa (%)','Plazo (años)','Pago mensual','Total intereses','Fecha inicio'].forEach((h, c) => {
+      setCell(wsBR, r, c, h, { fill: xlFill('1E293B'), font: xlFont(true, XL.white, 9), align: xlAlign('center'), border: xlBorder() });
+    }); r++;
+    myProps.forEach((p, i) => {
+      const tasa = p.tasa || 10.5;
+      const plazo = p.plazo || 20;
+      const cred  = p.credito || 0;
+      const tasaMes = tasa/100/12;
+      const n = plazo*12;
+      const mensual = tasaMes > 0 ? cred * tasaMes * Math.pow(1+tasaMes,n)/(Math.pow(1+tasaMes,n)-1) : cred/n;
+      const totalInt = mensual*n - cred;
+      const bg = i%2===0 ? XL.white : XL.lightGray;
+      [p.nombre||'Propiedad', p.valor||0, cred, tasa, plazo, Math.round(mensual), Math.round(totalInt), p.fecha||'—'].forEach((v, c) => {
+        setCell(wsBR, r, c, v, {
+          fill: xlFill(bg), font: xlFont(false, c===5?XL.accent:c===6?'DC2626':XL.textDark, 10),
+          align: xlAlign(c===0||c===7?'left':'right'), border: xlBorder(),
+          numFmt: [1,2,5,6].includes(c)?'$#,##0':c===3?'0.00"%"':undefined,
+        });
+      }); r++;
+    });
+    wsBR['!ref']  = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:r+1,c:8} });
+    wsBR['!cols'] = [22,14,14,10,12,14,16,14].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, wsBR, 'Bienes Raices');
+  }
+
+  // RETIRO (si hay datos)
+  const edadEl = document.getElementById('ret-edad');
+  if (IS_PREMIUM && edadEl) {
+    const wsRet = {};
+    wsRet['!merges'] = [];
+    let r = 0;
+    const edad      = parseInt(document.getElementById('ret-edad')?.value)||32;
+    const edadRet   = parseInt(document.getElementById('ret-edad-retiro')?.value)||65;
+    const salario   = parseFloat(document.getElementById('ret-salario')?.value)||0;
+    const saldoIni  = parseFloat(document.getElementById('ret-saldo')?.value)||0;
+    const irn       = parseFloat(document.getElementById('ret-irn')?.value)||9.44;
+    const aforeEl   = document.getElementById('ret-afore');
+    const aforeNom  = aforeEl ? aforeEl.options[aforeEl.selectedIndex]?.text : 'AFORE';
+    const pension   = parseFloat(document.getElementById('ret-pension-mensual')?.textContent?.replace(/[$,]/g,''))||0;
+    const pensionVol= parseFloat(document.getElementById('ret-pension-vol')?.textContent?.replace(/[$,]/g,''))||0;
+    const saldoFin  = parseFloat(document.getElementById('ret-saldo-final')?.textContent?.replace(/[$,]/g,''))||0;
+
+    setCell(wsRet, r, 0, '🧓 PROYECCIÓN DE RETIRO', { fill: xlFill(XL.darkBg), font: xlFont(true, XL.accent, 13), align: xlAlign('center') });
+    wsRet['!merges'].push({ s:{r,c:0}, e:{r,c:3} }); r += 2;
+
+    const datos = [
+      ['Edad actual', edad],
+      ['Edad de retiro', edadRet],
+      ['Años para retiro', edadRet-edad],
+      ['Salario mensual', salario],
+      ['Saldo actual AFORE', saldoIni],
+      ['AFORE seleccionada', aforeNom],
+      ['IRN anual (%)', irn],
+      ['Saldo proyectado al retiro', saldoFin],
+      ['Pensión mensual estimada', pension],
+      ['Pensión con ahorro voluntario', pensionVol],
+    ];
+
+    datos.forEach(([label, val], i) => {
+      const bg = i%2===0 ? XL.white : XL.lightGray;
+      const isNum = typeof val === 'number';
+      const isMoney = ['Salario','Saldo','Pensión'].some(k => label.includes(k));
+      setCell(wsRet, r, 0, label, { fill: xlFill(bg), font: xlFont(false, XL.textDark, 10), align: xlAlign(), border: xlBorder() });
+      setCell(wsRet, r, 1, val,   { fill: xlFill(bg), font: xlFont(true, XL.accent, 10), align: xlAlign('right'), border: xlBorder(), numFmt: isMoney?'$#,##0':isNum?'0':undefined });
+      r++;
+    });
+
+    wsRet['!ref']  = XLSX.utils.encode_range({ s:{r:0,c:0}, e:{r:r+1,c:4} });
+    wsRet['!cols'] = [30, 18].map(w => ({ wch: w }));
+    XLSX.utils.book_append_sheet(wb, wsRet, 'Retiro');
+  }
+
+  // ── GUARDAR ──
+  const fecha  = new Date().toISOString().slice(0,10);
+  const nombre = IS_PREMIUM ? `FinanceStudio_Premium_${fecha}.xlsx` : `FinanceStudio_Presupuesto_${fecha}.xlsx`;
+  XLSX.writeFile(wb, nombre);
+  setText('excel-status', 'Exportado: ' + nombre);
+  showToast('📊 Excel descargado: ' + nombre);
+}
+
+// ── IMPORTAR ──
+function importarExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (typeof XLSX === 'undefined') { showToast('⚠️ SheetJS no cargó'); return; }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const wb   = XLSX.read(e.target.result, { type: 'array', cellStyles: true });
+
+      // Leer hoja de cada mes (Ene 2026, Feb 2026, etc.)
+      let importados = 0;
+      MONTHS.forEach((mes, i) => {
+        const sheetName = mes.slice(0,3) + ' 2026';
+        const ws = wb.Sheets[sheetName];
+        if (!ws) return;
+
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        // Parsear secciones por título
+        const d = allData[i];
+        let seccion = null;
+        rows.forEach(row => {
+          const label = String(row[0]||'').trim();
+          if (label.includes('INGRESOS'))           seccion = 'ingresos';
+          else if (label.includes('GASTOS FIJOS'))  seccion = 'fijos';
+          else if (label.includes('AHORRO'))        seccion = 'ahorro';
+          else if (label.includes('ESTILO DE VIDA'))seccion = 'vida';
+          else if (label.includes('BALANCE') || label.includes('TOTAL')) seccion = null;
+          else if (label && seccion && !label.includes('Concepto') && row[1] !== undefined) {
+            const est  = parseFloat(String(row[1]).replace(/[$,]/g,'')) || 0;
+            const real = parseFloat(String(row[2]).replace(/[$,]/g,'')) || 0;
+            const freq = String(row[4]||'Mensual');
+            if (seccion === 'ingresos') {
+              const exists = d.ingresos.find(r => r.label === label);
+              if (exists) { exists.est=est; exists.real=real; }
+              else d.ingresos.push({ label, est, real });
+            } else if (seccion === 'fijos') {
+              const arr = [...d.fijosInd,...d.fijosNoi];
+              const exists = arr.find(r => r.label === label);
+              if (exists) { exists.est=est; exists.real=real; exists.freq=freq; }
+              else d.fijosNoi.push({ label, est, real, freq });
+            } else if (seccion === 'ahorro') {
+              const exists = d.ahorro.find(r => r.label === label);
+              if (exists) { exists.est=est; exists.real=real; }
+              else d.ahorro.push({ label, est, real });
+            } else if (seccion === 'vida') {
+              const exists = d.vida.find(r => r.label === label);
+              if (exists) { exists.est=est; exists.real=real; exists.freq=freq; }
+              else d.vida.push({ label, est, real, freq });
+            }
+          }
+        });
+        importados++;
+      });
+
+      if (importados === 0) {
+        showToast('⚠️ No se encontraron hojas de meses en el Excel');
+        return;
+      }
+
+      saveData();
+      renderPresupuesto();
+      updateDashboard();
+      if (currentMonth === -1) renderDashboardAnual();
+      setText('excel-status', 'Cargado: ' + file.name + ' (' + importados + ' meses)');
+      showToast('📂 Excel cargado: ' + importados + ' mes' + (importados!==1?'es':''));
+    } catch(err) {
+      showToast('❌ Error al leer el Excel: ' + err.message);
+      console.error(err);
+    }
+    input.value = ''; // reset input
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+initGumroadLinks();
 buildMonthBars();
 loadMetas();
 initFechaBadges();
