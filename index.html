@@ -10,13 +10,13 @@
 <meta name="author" content="Finance Studio">
 <link rel="canonical" href="https://finstudiomx-hub.github.io/finance-studio">
 <meta property="og:title" content="Finance Studio — Finanzas Personales MX">
-<meta property="og:description" content="Presupuesto 50/20/30, inversiones, hipoteca y retiro. Todo en un solo lugar.">
+<meta property="og:description" content="Presupuesto, inversiones, hipoteca y retiro. Todo en un solo lugar.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://finstudiomx-hub.github.io/finance-studio">
 <meta property="og:image" content="https://finstudiomx-hub.github.io/finance-studio/preview.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Finance Studio — Finanzas Personales MX">
-<meta name="twitter:description" content="Presupuesto 50/20/30, inversiones, hipoteca y retiro. Gratis.">
+<meta name="twitter:description" content="Presupuesto, inversiones, hipoteca y retiro. Gratis.">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -279,7 +279,7 @@
     margin-top: 6px;
   }
 
-  /* ── 50/20/30 METERS ── */
+  /* ──  METERS ── */
   .meters-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -404,6 +404,13 @@
   :root.light .income-row:hover .del-btn,
   :root.light .savings-row:hover .del-btn { color: #94A3B8; }
   :root.light .del-btn:hover   { color: var(--danger) !important; background: #FEE2E2; }
+  /* Portafolio y propiedades: siempre visible en light también */
+  :root.light .portafolio-row .del-btn,
+  :root.light .calc-card .del-btn,
+  :root.light .del-btn.port-del { color: #EF4444 !important; opacity: 0.75; }
+  :root.light .portafolio-row .del-btn:hover,
+  :root.light .calc-card .del-btn:hover,
+  :root.light .del-btn.port-del:hover { color: var(--danger) !important; opacity: 1; background: #FEE2E2; }
   :root.light .toast           { box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
   :root.light .sidebar-footer  { border-color: #E2E8F0; color: #94A3B8; }
   :root.light .logo-sub        { color: #94A3B8; }
@@ -878,6 +885,47 @@
     font-family: var(--mono); margin-top: 8px; width: 100%;
   }
 
+  .grupo-label {
+    padding: 10px 20px 6px;
+    font-size: 10px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 700;
+    background: rgba(96,165,250,0.04);
+    border-bottom: 1px solid rgba(96,165,250,0.1);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .grupo-label::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    background: var(--accent2);
+    border-radius: 2px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+  :root.light .grupo-label {
+    background: rgba(37,99,235,0.04);
+    border-bottom-color: rgba(37,99,235,0.1);
+    color: #2563EB;
+  }
+  :root.light .grupo-label::before { background: #2563EB; }
+
+  /* Budget rows dentro de subgrupos — indent visual */
+  #rows-fijos-ind .budget-row,
+  #rows-fijos-svc .budget-row,
+  #rows-fijos-cmp .budget-row {
+    padding-left: 28px;
+  }
+  #rows-ahorro-aho .savings-row,
+  #rows-ahorro-inv .savings-row {
+    padding-left: 28px;
+  }
+
   /* ── BIENES RAÍCES ── */
   .br-tabs {
     display: flex; gap: 6px; margin-bottom: 24px;
@@ -1178,6 +1226,13 @@
     transition: color 0.15s, background 0.15s;
   }
   .del-btn:hover { color: var(--danger); background: rgba(248,113,113,0.1); }
+  /* Portafolio y propiedades: botón siempre visible */
+  .portafolio-row .del-btn,
+  .calc-card .del-btn,
+  .del-btn.port-del { color: #F87171 !important; opacity: 0.75; }
+  .portafolio-row .del-btn:hover,
+  .calc-card .del-btn:hover,
+  .del-btn.port-del:hover { color: var(--danger) !important; opacity: 1; background: rgba(248,113,113,0.15); }
 
   .empty-port {
     padding: 32px;
@@ -1327,7 +1382,7 @@
       <div id="excel-bar" style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
         <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;flex-shrink:0">📊 Excel</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">
-          <button class="btn btn-ghost" style="font-size:12px" onclick="exportarExcel()">⬇️ Descargar Excel</button>
+          <button class="btn btn-ghost" style="font-size:12px" onclick="exportarExcel()">⬇️ Descargar Excel (presupuesto)</button>
           <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('excel-file-input').click()">📂 Cargar Excel</button>
           <input type="file" id="excel-file-input" accept=".xlsx" style="display:none" onchange="importarExcel(this)">
         </div>
@@ -1348,7 +1403,7 @@
             <div class="anual-sub">Estimado acumulado</div>
           </div>
           <div class="anual-card blue">
-            <div class="anual-label">Gastos fijos año</div>
+            <div class="anual-label">Recurrentes año</div>
             <div class="anual-val blue" id="an-fij-total">$0</div>
             <div class="anual-sub" id="an-fij-pct">0% del ingreso</div>
           </div>
@@ -1391,7 +1446,7 @@
             <div class="anual-sub" id="an-meses-badge">0 meses con datos</div>
           </div>
           <div class="anual-card">
-            <div class="anual-label">Gasto fijo prom./mes</div>
+            <div class="anual-label">Recurrentes prom./mes</div>
             <div class="anual-val blue" id="an-avg-fij">$0</div>
           </div>
           <div class="anual-card">
@@ -1418,9 +1473,9 @@
                 <tr>
                   <th>Mes</th>
                   <th>Ingresos</th>
-                  <th>Gastos fijos</th>
+                  <th>Recurrentes</th>
                   <th>Ahorro</th>
-                  <th>Estilo vida</th>
+                  <th>Gastos pers.</th>
                   <th>Gan. inversiones</th>
                   <th>Balance</th>
                 </tr>
@@ -1462,19 +1517,19 @@
             </div>
           </div>
           <div class="summary-card blue">
-            <div class="card-label">Gastos fijos</div>
+            <div class="card-label">Recurrentes</div>
             <div class="card-value blue" id="d-fijos">$0</div>
-            <div class="card-detail">Meta: <span id="d-fijos-meta">$0</span></div>
+            <div class="card-detail" id="d-fijos-pct-label">0% del ingreso</div>
           </div>
           <div class="summary-card pink">
             <div class="card-label">Estilo de vida</div>
             <div class="card-value pink" id="d-vida">$0</div>
-            <div class="card-detail">Meta: <span id="d-vida-meta">$0</span></div>
+            <div class="card-detail" id="d-vida-pct-label">0% del ingreso</div>
           </div>
           <div class="summary-card yellow">
             <div class="card-label">Ahorro</div>
             <div class="card-value yellow" id="d-ahorro">$0</div>
-            <div class="card-detail">Meta: <span id="d-ahorro-meta">$0</span></div>
+            <div class="card-detail" id="d-ahorro-pct-label">0% del ingreso</div>
           </div>
         </div>
 
@@ -1484,16 +1539,16 @@
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:12px;color:var(--muted)">Suma:</span>
             <span id="pct-suma-badge" style="font-family:var(--mono);font-size:13px;font-weight:600;padding:2px 10px;border-radius:6px;background:rgba(74,222,128,0.1);color:var(--accent)">100%</span>
-            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="resetMetas()">Restaurar 50/20/30</button>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="resetMetas()">Restaurar </button>
           </div>
         </div>
 
-        <!-- Medidores 50/20/30 -->
+        <!-- Medidores  -->
         <div class="meters-row">
           <div class="meter-card">
             <div class="meter-header">
               <div>
-                <div class="meter-title">💼 Gastos Fijos</div>
+                <div class="meter-title">🔄 Gastos Recurrentes</div>
                 <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
                   <span style="font-size:12px;color:var(--muted)">Meta:</span>
                   <input type="number" id="meta-fijos" value="50" min="0" max="100" step="1"
@@ -1510,7 +1565,7 @@
             <div class="meter-bar-bg"><div class="meter-bar-fill fill-blue" id="m-fijos-bar" style="width:0%"></div></div>
             <div class="meter-amounts" style="margin-top:8px;">
               <span id="m-fijos-real" style="font-size:12px">$0 real</span>
-              <span style="font-size:12px">meta <span id="m-fijos-goal">$0</span></span>
+<span style="font-size:12px;color:var(--muted)">meta <span id="m-fijos-goal">$0</span></span>
             </div>
           </div>
           <div class="meter-card">
@@ -1533,13 +1588,13 @@
             <div class="meter-bar-bg"><div class="meter-bar-fill fill-green" id="m-ahorro-bar" style="width:0%"></div></div>
             <div class="meter-amounts" style="margin-top:8px;">
               <span id="m-ahorro-real" style="font-size:12px">$0 real</span>
-              <span style="font-size:12px">meta <span id="m-ahorro-goal">$0</span></span>
+<span style="font-size:12px;color:var(--muted)">meta <span id="m-ahorro-goal">$0</span></span>
             </div>
           </div>
           <div class="meter-card">
             <div class="meter-header">
               <div>
-                <div class="meter-title">✨ Estilo de Vida</div>
+                <div class="meter-title">🛒 Gastos Personales</div>
                 <div style="display:flex;align-items:center;gap:6px;margin-top:4px;">
                   <span style="font-size:12px;color:var(--muted)">Meta:</span>
                   <input type="number" id="meta-vida" value="30" min="0" max="100" step="1"
@@ -1556,7 +1611,7 @@
             <div class="meter-bar-bg"><div class="meter-bar-fill fill-pink" id="m-vida-bar" style="width:0%"></div></div>
             <div class="meter-amounts" style="margin-top:8px;">
               <span id="m-vida-real" style="font-size:12px">$0 real</span>
-              <span style="font-size:12px">meta <span id="m-vida-goal">$0</span></span>
+<span style="font-size:12px;color:var(--muted)">meta <span id="m-vida-goal">$0</span></span>
             </div>
           </div>
         </div>
@@ -1577,13 +1632,13 @@
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#F472B6" stroke-width="18"
                   stroke-dasharray="94 220" stroke-dashoffset="-62" id="donut-vida"
                   transform="rotate(-90 60 60)" style="transition:all 0.6s"/>
-                <text x="60" y="56" text-anchor="middle" fill="#E8EAF0" font-size="13" font-family="DM Mono" font-weight="500" id="donut-center-pct">50%</text>
-                <text x="60" y="70" text-anchor="middle" fill="#6B7399" font-size="9" font-family="DM Sans">fijos</text>
+                <text x="60" y="54" text-anchor="middle" fill="#E8EAF0" font-size="13" font-family="DM Mono" font-weight="500" id="donut-center-pct">0%</text>
+                <text x="60" y="67" text-anchor="middle" fill="#6B7399" font-size="9" font-family="DM Sans" id="donut-center-sub">asignado</text>
               </svg>
               <div class="donut-legend">
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--accent2)"></div>
-                  <span class="legend-label">Gastos Fijos</span>
+                  <span class="legend-label">Recurrentes</span>
                   <span class="legend-val" id="leg-fijos">$0</span>
                 </div>
                 <div class="legend-item">
@@ -1593,7 +1648,7 @@
                 </div>
                 <div class="legend-item">
                   <div class="legend-dot" style="background:var(--accent3)"></div>
-                  <span class="legend-label">Estilo de vida</span>
+                  <span class="legend-label">Gastos personales</span>
                   <span class="legend-val" id="leg-vida">$0</span>
                 </div>
                 <div class="legend-item">
@@ -1618,7 +1673,7 @@
     <div class="page" id="page-presupuesto">
       <div class="topbar">
         <div>
-          <div class="page-title">Presupuesto 50/20/30</div>
+          <div class="page-title">Presupuesto</div>
           <div class="page-subtitle">Regla de las tres categorías · <span id="pres-mes-label">Enero 2026</span></div>
         </div>
         <div class="topbar-actions">
@@ -1665,13 +1720,12 @@
         </div>
       </div>
 
-      <!-- GASTOS FIJOS 50% -->
+      <!-- GASTOS RECURRENTES -->
       <div class="budget-section">
         <div class="section-header" onclick="toggleSection('fijos')">
           <div class="section-title-row">
-            <span class="section-icon">🏠</span>
-            <span class="section-title">Gastos Fijos</span>
-            <span class="section-badge badge-blue">50%</span>
+            <span class="section-icon">🔄</span>
+            <span class="section-title">Gastos Recurrentes</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <span class="section-total" id="total-fijos-est">$0</span>
@@ -1679,7 +1733,7 @@
           </div>
         </div>
         <div class="section-body" id="body-fijos">
-          <div class="row-col-headers">
+          <div class="row-col-headers" style="padding-left:28px">
             <div class="col-header">Concepto</div>
             <div class="col-header">Estimado</div>
             <div class="col-header">Real</div>
@@ -1687,13 +1741,17 @@
             <div class="col-header">Frecuencia</div>
             <div></div>
           </div>
-          <div style="padding:8px 20px 4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;background:rgba(255,255,255,0.01)">Indispensables</div>
+          <div class="grupo-label">Vivienda</div>
           <div id="rows-fijos-ind"><!-- JS --></div>
-          <div style="padding:8px 20px 4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;background:rgba(255,255,255,0.01);border-top:1px solid var(--border)">No indispensables</div>
-          <div id="rows-fijos-noi"><!-- JS --></div>
-          <button class="add-row-btn" onclick="addRow('fijos')">＋ Agregar gasto fijo</button>
+          <button class="add-row-btn" style="border-top:none;padding-left:28px" onclick="addRow('fijos-ind')">＋ Agregar en Vivienda</button>
+          <div class="grupo-label" style="border-top:1px solid var(--border)">Servicios y suscripciones</div>
+          <div id="rows-fijos-svc"><!-- JS --></div>
+          <button class="add-row-btn" style="border-top:none;padding-left:28px" onclick="addRow('fijos-svc')">＋ Agregar en Servicios</button>
+          <div class="grupo-label" style="border-top:1px solid var(--border)">Compromisos</div>
+          <div id="rows-fijos-cmp"><!-- JS --></div>
+          <button class="add-row-btn" style="border-top:none;padding-left:28px" onclick="addRow('fijos-cmp')">＋ Agregar en Compromisos</button>
           <div class="totals-row">
-            <span class="total-label">Total gastos fijos</span>
+            <span class="total-label">Total gastos recurrentes</span>
             <span class="total-val" id="tot-fij-est">$0</span>
             <span class="total-val" id="tot-fij-real">$0</span>
             <span class="total-val diff-neg" id="tot-fij-diff">$0</span>
@@ -1702,13 +1760,12 @@
         </div>
       </div>
 
-      <!-- AHORRO E INVERSIÓN 20% -->
+      <!-- AHORRO E INVERSIÓN -->
       <div class="budget-section">
         <div class="section-header" onclick="toggleSection('ahorro')">
           <div class="section-title-row">
             <span class="section-icon">🎯</span>
             <span class="section-title">Ahorro e Inversión</span>
-            <span class="section-badge badge-green">20%</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <span class="section-total" id="total-ahorro-est">$0</span>
@@ -1724,10 +1781,14 @@
             <div class="col-header" style="text-align:right">% Ingreso</div>
             <div></div>
           </div>
-          <div id="rows-ahorro"><!-- JS --></div>
-          <button class="add-row-btn" onclick="addRow('ahorro')">＋ Agregar ahorro/inversión</button>
+          <div class="grupo-label">Ahorro</div>
+          <div id="rows-ahorro-aho"><!-- JS --></div>
+          <button class="add-row-btn" style="border-top:none;padding-left:28px" onclick="addRow('ahorro-aho')">＋ Agregar en Ahorro</button>
+          <div class="grupo-label" style="border-top:1px solid var(--border)">Inversiones</div>
+          <div id="rows-ahorro-inv"><!-- JS --></div>
+          <button class="add-row-btn" style="border-top:none;padding-left:28px" onclick="addRow('ahorro-inv')">＋ Agregar en Inversiones</button>
           <div class="totals-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr">
-            <span class="total-label">Total ahorro</span>
+            <span class="total-label">Total ahorro e inversión</span>
             <span class="total-val" id="tot-aho-est">$0</span>
             <span class="total-val" id="tot-aho-real">$0</span>
             <span class="total-val" id="tot-aho-diff">$0</span>
@@ -1736,13 +1797,12 @@
         </div>
       </div>
 
-      <!-- ESTILO DE VIDA 30% -->
+      <!-- GASTOS PERSONALES -->
       <div class="budget-section">
         <div class="section-header" onclick="toggleSection('vida')">
           <div class="section-title-row">
-            <span class="section-icon">✨</span>
-            <span class="section-title">Estilo de Vida</span>
-            <span class="section-badge badge-pink">30%</span>
+            <span class="section-icon">🛒</span>
+            <span class="section-title">Gastos Personales</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px">
             <span class="section-total" id="total-vida-est">$0</span>
@@ -1759,9 +1819,9 @@
             <div></div>
           </div>
           <div id="rows-vida"><!-- JS --></div>
-          <button class="add-row-btn" onclick="addRow('vida')">＋ Agregar gasto de estilo de vida</button>
+          <button class="add-row-btn" onclick="addRow('vida')">＋ Agregar gasto personal</button>
           <div class="totals-row">
-            <span class="total-label">Total estilo de vida</span>
+            <span class="total-label">Total gastos personales</span>
             <span class="total-val" id="tot-vid-est">$0</span>
             <span class="total-val" id="tot-vid-real">$0</span>
             <span class="total-val" id="tot-vid-diff">$0</span>
@@ -2013,7 +2073,7 @@
                   <div class="result-label">Con seguro incluido</div>
                   <div class="result-val" id="br-mensual-total" style="color:var(--warn);font-size:22px">$0</div>
                   <div style="font-size:11px;color:var(--muted);margin-top:4px">Pago real mensual</div>
-                  <button class="btn-add-pres" style="margin-top:8px;width:100%;justify-content:center" onclick="addBrToPresupuesto()">→ Agregar al presupuesto</button>
+                  <button class="btn btn-primary" style="margin-top:10px;width:100%;font-size:12px;padding:8px" onclick="addBrToPresupuesto()">＋ Agregar hipoteca a Vivienda</button>
                 </div>
               </div>
               <div class="br-result-hero" style="grid-template-columns:1fr 1fr 1fr">
@@ -2082,6 +2142,14 @@
                   <span style="font-family:var(--mono);color:var(--accent);font-size:16px;font-weight:600" id="br-costo-total">$0</span>
                 </div>
               </div>
+              <div style="margin-top:14px;">
+                <button class="btn btn-primary" style="width:100%;padding:11px" onclick="simuladorAPropiedades()">
+                  🏠 Guardar simulación en Mis propiedades
+                </button>
+                <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">
+                  Desde Mis propiedades puedes enviar el pago mensual al presupuesto
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -2093,6 +2161,7 @@
             <div style="display:flex;gap:8px;">
               <button class="btn btn-ghost" style="font-size:12px" onclick="toggleAmortView('anual')">Vista anual</button>
               <button class="btn btn-ghost" style="font-size:12px" onclick="toggleAmortView('mensual')">Vista mensual</button>
+              <button class="btn btn-ghost" style="font-size:12px" onclick="imprimirTablaAmortizacion()">🖨️ Imprimir PDF</button>
             </div>
           </div>
           <div class="table-scroll" style="max-height:400px;overflow-y:auto;">
@@ -2241,17 +2310,14 @@
               </table>
             </div>
 
-            <!-- Botones guardar -->
+            <!-- Botón guardar: flujo Calculadora → Portafolio → Presupuesto -->
             <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
               <button class="btn btn-primary" style="flex:1;padding:12px" onclick="guardarCarteraEnPortafolio()">
                 💼 Guardar cartera en portafolio
               </button>
-              <button class="btn btn-ghost" style="flex:1;padding:12px" onclick="guardarCarteraEnPresupuesto()">
-                📋 Agregar pagos al presupuesto
-              </button>
             </div>
             <div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">
-              Guardar en portafolio agrega cada inversión al módulo Mi portafolio · Agregar al presupuesto las suma como ahorro en el mes de inicio
+              La cartera se guarda en Mi portafolio con los montos calculados · Desde el portafolio puedes enviarla al presupuesto
             </div>
 
           </div>
@@ -2451,8 +2517,14 @@
                     <div class="field-hint">Aguinaldo, bono, etc.</div>
                   </div>
                   <div>
-                    <div class="field-label">Desde qué año</div>
-                    <input class="field-input" type="number" id="ret-vol-desde" value="1" min="1" oninput="retCalc()">
+                    <div class="field-label">Fecha de inicio</div>
+                    <input class="field-input" type="month" id="ret-vol-ini" oninput="retCalc()">
+                    <div class="field-hint">Cuándo empiezas a aportar</div>
+                  </div>
+                  <div>
+                    <div class="field-label">Fecha de término</div>
+                    <input class="field-input" type="month" id="ret-vol-fin" oninput="retCalc()">
+                    <div class="field-hint">Puede abarcar varios años · vacío = hasta el retiro</div>
                   </div>
                   <div>
                     <div class="field-label">Deducción ISR estimada (%)</div>
@@ -2463,6 +2535,9 @@
                 <div style="background:rgba(74,222,128,0.07);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted)">
                   💡 El SAT te devuelve aprox. <strong style="color:var(--accent)" id="ret-isr-devol">$0/año</strong> en declaración anual por aportaciones voluntarias (Art. 151 LISR, límite 10% de ingreso o 5 UMAS anuales).
                 </div>
+                <button class="btn btn-primary" style="width:100%;padding:10px;margin-top:12px" onclick="retiroAPresupuesto()">
+                  📋 Agregar aportación al presupuesto
+                </button>
               </div>
               <div id="ret-vol-off" style="font-size:13px;color:var(--muted)">Activa para sumar aportaciones voluntarias y ver el impacto en tu pensión.</div>
             </div>
@@ -2496,7 +2571,7 @@
                 <div class="br-hero-box">
                   <div class="result-label">Aportación obligatoria/mes</div>
                   <div class="result-val" id="ret-aport-oblig" style="font-size:16px">$0</div>
-                  <button class="btn-add-pres" style="margin-top:8px;width:100%;justify-content:center" onclick="addRetToPresupuesto()">→ Agregar al presupuesto</button>
+                  <button class="btn btn-primary" style="margin-top:10px;width:100%;font-size:12px;padding:8px" onclick="addRetToPresupuesto()">＋ Agregar AFORE a Ahorro</button>
                 </div>
                 <div class="br-hero-box">
                   <div class="result-label">Años para retiro</div>
@@ -2672,9 +2747,9 @@
     <div class="modal-field">
       <label>Sección del presupuesto</label>
       <select id="mod-seccion">
-        <option value="fijos">🏠 Gastos Fijos (hipoteca, crédito…)</option>
+        <option value="fijos">🔄 Gastos Recurrentes</option>
         <option value="ahorro">🎯 Ahorro e Inversión (AFORE, fondos…)</option>
-        <option value="vida">✨ Estilo de Vida</option>
+        <option value="vida">🛒 Gastos Personales</option>
         <option value="ingresos">💵 Ingresos</option>
       </select>
     </div>
@@ -2716,46 +2791,130 @@ function defaultMonthData() {
     ingresos: [
       { label: 'Ingreso fijo (sueldo)',   est: 0, real: 0 },
       { label: 'Ingreso variable',         est: 0, real: 0 },
-      { label: 'Otro ingreso',             est: 0, real: 0 },
     ],
     fijosInd: [
-      { label: 'Renta / Hipoteca',                    est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Servicios (agua, luz, internet)',      est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Alimentación',                         est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Transporte trabajo/escuela',           est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Salud (médico, medicamentos)',         est: 0, real: 0, freq: 'Variable' },
-      { label: 'Colegiaturas',                         est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Deudas / créditos',                   est: 0, real: 0, freq: 'Mensual' },
+      { label: 'Renta',               est: 0, real: 0, freq: 'Mensual', grupo: 'Vivienda' },
+      { label: 'Hipoteca',            est: 0, real: 0, freq: 'Mensual', grupo: 'Vivienda' },
+      { label: 'Predial',             est: 0, real: 0, freq: 'Anual',   grupo: 'Vivienda' },
+      { label: 'Mantenimiento',       est: 0, real: 0, freq: 'Mensual', grupo: 'Vivienda' },
     ],
     fijosNoi: [
-      { label: 'Streaming (Netflix, Spotify…)',        est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Suscripciones (Costco, Canva…)',       est: 0, real: 0, freq: 'Anual' },
-      { label: 'Seguro (SGMM, Vida)',                  est: 0, real: 0, freq: 'Mensual' },
+      { label: 'Agua',                est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Luz',                 est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Gas',                 est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Internet',            est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Telefonía',           est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Streaming',           est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Software',            est: 0, real: 0, freq: 'Mensual', grupo: 'Servicios' },
+      { label: 'Tarjetas de crédito', est: 0, real: 0, freq: 'Mensual', grupo: 'Compromisos' },
+      { label: 'Préstamos',           est: 0, real: 0, freq: 'Mensual', grupo: 'Compromisos' },
+      { label: 'Seguros',             est: 0, real: 0, freq: 'Mensual', grupo: 'Compromisos' },
     ],
     ahorro: [
-      { label: 'Fondo de emergencias (Nu / CETES)',    est: 0, real: 0 },
-      { label: 'Plan personal de retiro (PPR)',        est: 0, real: 0 },
-      { label: 'Inversiones (bolsa, ETFs, Fibras)',    est: 0, real: 0 },
-      { label: 'Meta de ahorro 1',                    est: 0, real: 0 },
+      { label: 'Fondo de emergencia', est: 0, real: 0, grupo: 'Ahorro' },
+      { label: 'PPR',                 est: 0, real: 0, grupo: 'Ahorro' },
+      { label: 'Metas de ahorro',     est: 0, real: 0, grupo: 'Ahorro' },
+      { label: 'Inversión',           est: 0, real: 0, grupo: 'Inversiones' },
     ],
     vida: [
-      { label: 'Restaurantes / cafeterías',            est: 0, real: 0, freq: 'Variable' },
-      { label: 'Cine / museo / teatro',                est: 0, real: 0, freq: 'Variable' },
-      { label: 'Viajes / vacaciones',                  est: 0, real: 0, freq: 'Variable' },
-      { label: 'Hobbies / gym / clases',               est: 0, real: 0, freq: 'Mensual' },
-      { label: 'Ropa y zapatos',                       est: 0, real: 0, freq: 'Variable' },
-      { label: 'Belleza (pelo, uñas, skincare)',        est: 0, real: 0, freq: 'Variable' },
-      { label: 'Amazon / Shein / compras online',      est: 0, real: 0, freq: 'Variable' },
-      { label: 'Donativos y propinas',                 est: 0, real: 0, freq: 'Variable' },
+      { label: 'Alimentación',        est: 0, real: 0, freq: 'Mensual',  grupo: 'Gastos personales' },
+      { label: 'Transporte',          est: 0, real: 0, freq: 'Mensual',  grupo: 'Gastos personales' },
+      { label: 'Salud',               est: 0, real: 0, freq: 'Variable', grupo: 'Gastos personales' },
+      { label: 'Restaurantes',        est: 0, real: 0, freq: 'Variable', grupo: 'Gastos personales' },
+      { label: 'Viajes',              est: 0, real: 0, freq: 'Variable', grupo: 'Gastos personales' },
+      { label: 'Compras',             est: 0, real: 0, freq: 'Variable', grupo: 'Gastos personales' },
+      { label: 'Gym',                 est: 0, real: 0, freq: 'Mensual',  grupo: 'Gastos personales' },
+      { label: 'Hobbies',             est: 0, real: 0, freq: 'Variable', grupo: 'Gastos personales' },
     ]
   };
 }
 
 // Load from localStorage or create defaults for all months
+
+function migrateMonthData(d) {
+  if (!d) return defaultMonthData();
+
+  // ── Migrar fijosInd a nueva estructura si tiene datos viejos ──
+  const oldFijLabels = ['Renta / Hipoteca','Servicios (agua, luz, internet)',
+    'Alimentación','Transporte trabajo/escuela','Salud (médico, medicamentos)',
+    'Colegiaturas','Deudas / créditos'];
+  const oldNoiLabels = ['Streaming (Netflix, Spotify…)','Suscripciones (Costco, Canva…)','Seguro (SGMM, Vida)'];
+  const getE = (arr, ...lbls) => { for(const l of lbls){ const r=(arr||[]).find(x=>x.label===l); if(r&&r.est) return r.est; } return 0; };
+
+  const hasOldFij = (d.fijosInd||[]).some(r => oldFijLabels.includes(r.label));
+  const hasOldNoi = (d.fijosNoi||[]).some(r => oldNoiLabels.includes(r.label));
+  if (hasOldFij || hasOldNoi || !(d.fijosInd||[]).some(r=>r.grupo)) {
+    const fi = d.fijosInd || [], fn = d.fijosNoi || [];
+    d.fijosInd = [
+      {label:'Renta',               est:getE(fi,'Renta','Renta / Hipoteca'),  real:0, freq:'Mensual', grupo:'Vivienda'},
+      {label:'Hipoteca',            est:getE(fi,'Hipoteca'),                   real:0, freq:'Mensual', grupo:'Vivienda'},
+      {label:'Predial',             est:getE(fi,'Predial'),                    real:0, freq:'Anual',   grupo:'Vivienda'},
+      {label:'Mantenimiento',       est:getE(fi,'Mantenimiento'),              real:0, freq:'Mensual', grupo:'Vivienda'},
+    ];
+    d.fijosNoi = [
+      {label:'Agua',                est:getE(fn,'Agua'),                       real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Luz',                 est:getE(fn,'Luz'),                        real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Gas',                 est:getE(fn,'Gas'),                        real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Internet',            est:getE(fn,'Internet','Servicios (agua, luz, internet)'), real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Telefonía',           est:getE(fn,'Telefonía'),                  real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Streaming',           est:getE(fn,'Streaming','Streaming (Netflix, Spotify…)'),  real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Software',            est:getE(fn,'Software'),                   real:0, freq:'Mensual', grupo:'Servicios'},
+      {label:'Tarjetas de crédito', est:getE(fn,'Tarjetas de crédito'),        real:0, freq:'Mensual', grupo:'Compromisos'},
+      {label:'Préstamos',           est:getE(fn,'Préstamos'),                  real:0, freq:'Mensual', grupo:'Compromisos'},
+      {label:'Seguros',             est:getE(fn,'Seguros','Seguro (SGMM, Vida)'), real:0, freq:'Mensual', grupo:'Compromisos'},
+    ];
+  }
+  // Asegurar grupo en entradas existentes sin grupo
+  (d.fijosInd||[]).forEach(r=>{ if(!r.grupo) r.grupo='Vivienda'; });
+  (d.fijosNoi||[]).forEach(r=>{ if(!r.grupo) r.grupo=r.label&&['Tarjetas de crédito','Préstamos','Seguros'].includes(r.label)?'Compromisos':'Servicios'; });
+
+  // ── Migrar ahorro ──
+  const oldAhoLabels = ['Fondo de emergencias (Nu / CETES)','Plan personal de retiro (AFORE voluntario)',
+    'Inversiones (bolsa, ETFs, Fibras)','Meta de ahorro específica','Meta de ahorro 1',
+    'Plan personal de retiro (PPR)'];
+  const hasOldAho = (d.ahorro||[]).some(r => oldAhoLabels.includes(r.label));
+  if (hasOldAho || !(d.ahorro||[]).some(r=>r.grupo)) {
+    const ah = d.ahorro || [];
+    d.ahorro = [
+      {label:'Fondo de emergencia', est:getE(ah,'Fondo de emergencia','Fondo de emergencias (Nu / CETES)'), real:0, grupo:'Ahorro'},
+      {label:'PPR',                 est:getE(ah,'PPR','Plan personal de retiro (AFORE voluntario)','Plan personal de retiro (PPR)'), real:0, grupo:'Ahorro'},
+      {label:'Metas de ahorro',     est:getE(ah,'Metas de ahorro','Meta de ahorro específica','Meta de ahorro 1'), real:0, grupo:'Ahorro'},
+      {label:'Inversión',           est:getE(ah,'Inversión','Inversiones (bolsa, ETFs, Fibras)'), real:0, grupo:'Inversiones'},
+    ];
+  }
+  (d.ahorro||[]).forEach(r=>{ if(!r.grupo) r.grupo='Ahorro'; });
+
+  // ── Migrar vida ──
+  const oldVidLabels = ['Restaurantes / cafeterías','Cine / museo / teatro','Hobbies / gym / clases',
+    'Ropa y zapatos','Belleza / cuidado personal','Belleza (pelo, uñas, skincare)',
+    'Amazon / Shein / compras online','Donativos y propinas','Cine / entretenimiento'];
+  const hasOldVid = (d.vida||[]).some(r => oldVidLabels.includes(r.label));
+  if (hasOldVid || !(d.vida||[]).some(r=>r.grupo)) {
+    const vi = d.vida || [], fi2 = d.fijosInd || [];
+    d.vida = [
+      {label:'Alimentación', est:getE(vi,'Alimentación')||getE(fi2,'Alimentación'), real:0, freq:'Mensual',  grupo:'Gastos personales'},
+      {label:'Transporte',   est:getE(vi,'Transporte')||getE(fi2,'Transporte trabajo/escuela'), real:0, freq:'Mensual',  grupo:'Gastos personales'},
+      {label:'Salud',        est:getE(vi,'Salud')||getE(fi2,'Salud (médico, medicamentos)'),    real:0, freq:'Variable', grupo:'Gastos personales'},
+      {label:'Restaurantes', est:getE(vi,'Restaurantes','Restaurantes / cafeterías'),            real:0, freq:'Variable', grupo:'Gastos personales'},
+      {label:'Viajes',       est:getE(vi,'Viajes','Viajes / vacaciones'),                       real:0, freq:'Variable', grupo:'Gastos personales'},
+      {label:'Compras',      est:getE(vi,'Compras','Amazon / Shein / compras online'),          real:0, freq:'Variable', grupo:'Gastos personales'},
+      {label:'Gym',          est:getE(vi,'Gym','Hobbies / gym / clases'),                       real:0, freq:'Mensual',  grupo:'Gastos personales'},
+      {label:'Hobbies',      est:getE(vi,'Hobbies'),                                             real:0, freq:'Variable', grupo:'Gastos personales'},
+    ];
+  }
+  (d.vida||[]).forEach(r=>{ if(!r.grupo) r.grupo='Gastos personales'; });
+
+  return d;
+}
+
 function loadStorage() {
   try {
     const raw = localStorage.getItem('financeStudio2026');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const data = JSON.parse(raw);
+      MONTHS.forEach((_, i) => { if (data[i]) data[i] = migrateMonthData(data[i]); });
+      return data;
+    }
   } catch(e) { console.warn('Finance Studio: error al leer datos guardados'); }
   const data = {};
   MONTHS.forEach((_, i) => { data[i] = defaultMonthData(); });
@@ -3103,8 +3262,20 @@ function switchMonth() {
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    const oc = n.getAttribute('onclick') || '';
+    if (oc.includes("'" + id + "'")) n.classList.add('active');
+  });
+  // Al ir a presupuesto, asegurar que currentMonth sea un mes válido
+  if (id === 'presupuesto') {
+    if (currentMonth < 0) {
+      currentMonth = new Date().getMonth();
+      buildMonthBars();
+    }
+    renderPresupuesto();
+  }
 }
 
 function toggleSection(id) {
@@ -3212,11 +3383,50 @@ function renderIngresos(d) {
 // FIJOS
 function renderFijos(d) {
   renderGenericRows('rows-fijos-ind', d.fijosInd, d, () => renderFijos(d), true);
-  renderGenericRows('rows-fijos-noi', d.fijosNoi, d, () => renderFijos(d), true);
+  // Separar fijosNoi en Servicios y Compromisos
+  const svc = d.fijosNoi.filter(r => r.grupo !== 'Compromisos');
+  const cmp = d.fijosNoi.filter(r => r.grupo === 'Compromisos');
+  // Renderizar con índices correctos del array original
+  const renderSubgroup = (containerId, rows) => {
+    const cont = document.getElementById(containerId);
+    if (!cont) return;
+    cont.innerHTML = '';
+    rows.forEach(row => {
+      const i = d.fijosNoi.indexOf(row);
+      const div = document.createElement('div');
+      div.className = 'budget-row';
+      const label = document.createElement('input');
+      label.type = 'text'; label.className = 'num-input';
+      label.style.cssText = 'text-align:left;font-family:var(--sans)';
+      label.value = row.label;
+      label.addEventListener('change', () => { d.fijosNoi[i].label = label.value; });
+      const estInp  = makeInput(row.est,  v => { d.fijosNoi[i].est  = v; recalcAll(d); updateDashboard(); });
+      const realInp = makeInput(row.real, v => { d.fijosNoi[i].real = v; recalcAll(d); updateDashboard(); });
+      const diffCell = document.createElement('div');
+      diffCell.style.textAlign = 'right';
+      diffCell.appendChild(diffSpan(toMonthly(row.est, row.freq), toMonthly(row.real, row.freq)));
+      const sel = document.createElement('select');
+      sel.className = 'freq-select';
+      ['Mensual','Quincenal','Semanal','Semestral','Anual','Variable'].forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f; opt.textContent = f;
+        if (row.freq === f) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => { d.fijosNoi[i].freq = sel.value; recalcAll(d); updateDashboard(); });
+      const delBtn = makeDelBtn(() => { d.fijosNoi.splice(i, 1); renderFijos(d); recalcAll(d); updateDashboard(); });
+      div.appendChild(label); div.appendChild(estInp); div.appendChild(realInp);
+      div.appendChild(diffCell); div.appendChild(sel); div.appendChild(delBtn);
+      cont.appendChild(div);
+    });
+  };
+  renderSubgroup('rows-fijos-svc', svc);
+  renderSubgroup('rows-fijos-cmp', cmp);
 }
 
 function renderGenericRows(containerId, rows, d, onDelete, hasFreq) {
   const cont = document.getElementById(containerId);
+  if (!cont) return;
   cont.innerHTML = '';
   rows.forEach((row, i) => {
     const div = document.createElement('div');
@@ -3273,10 +3483,16 @@ function renderGenericRows(containerId, rows, d, onDelete, hasFreq) {
 }
 
 function renderAhorro(d) {
-  const cont = document.getElementById('rows-ahorro');
-  cont.innerHTML = '';
+  const contAho = document.getElementById('rows-ahorro-aho');
+  const contInv = document.getElementById('rows-ahorro-inv');
+  if (!contAho || !contInv) return;
+  contAho.innerHTML = '';
+  contInv.innerHTML = '';
   const ingTotal = d.ingresos.reduce((s,r) => s + r.est, 0);
+
   d.ahorro.forEach((row, i) => {
+    const isInv = row.grupo === 'Inversiones';
+    const target = isInv ? contInv : contAho;
     const div = document.createElement('div');
     div.className = 'savings-row';
 
@@ -3318,7 +3534,7 @@ function renderAhorro(d) {
 
     div.appendChild(label); div.appendChild(estInp); div.appendChild(realInp);
     div.appendChild(diffCell); div.appendChild(pctCell); div.appendChild(delBtn);
-    cont.appendChild(div);
+    target.appendChild(div);
   });
 }
 
@@ -3329,15 +3545,47 @@ function renderVida(d) {
 // ═══════════════════════════════════════════
 // ADD ROWS
 // ═══════════════════════════════════════════
-function addRow(section) {
-  if (currentMonth < 0) return;
+function addRow(section, grupo) {
+  // Si está en vista anual, cambiar al mes actual primero
+  if (currentMonth < 0) {
+    const hoy = new Date();
+    currentMonth = hoy.getMonth();
+    switchMonth();
+    // Dar tiempo al DOM para renderizar y luego agregar
+    setTimeout(() => addRow(section, grupo), 100);
+    return;
+  }
   const d = allData[currentMonth];
-  if (section === 'ingresos') { d.ingresos.push({ label:'Nuevo ingreso', est:0, real:0 }); renderIngresos(d); }
-  else if (section === 'fijos') { d.fijosNoi.push({ label:'Nuevo gasto fijo', est:0, real:0, freq:'Mensual' }); renderFijos(d); }
-
-  else if (section === 'ahorro') { d.ahorro.push({ label:'Nueva inversión', est:0, real:0 }); renderAhorro(d); }
-  else if (section === 'vida') { d.vida.push({ label:'Nuevo gasto', est:0, real:0, freq:'Variable' }); renderVida(d); }
+  if (section === 'ingresos') {
+    d.ingresos.push({ label:'Nuevo ingreso', est:0, real:0 });
+    renderIngresos(d);
+  } else if (section === 'fijos-ind') {
+    d.fijosInd.push({ label:'Nueva vivienda', est:0, real:0, freq:'Mensual', grupo:'Vivienda' });
+    renderFijos(d);
+  } else if (section === 'fijos-svc') {
+    d.fijosNoi.push({ label:'Nuevo servicio', est:0, real:0, freq:'Mensual', grupo:'Servicios' });
+    renderFijos(d);
+  } else if (section === 'fijos-cmp') {
+    d.fijosNoi.push({ label:'Nuevo compromiso', est:0, real:0, freq:'Mensual', grupo:'Compromisos' });
+    renderFijos(d);
+  } else if (section === 'fijos') {
+    d.fijosNoi.push({ label:'Nuevo gasto recurrente', est:0, real:0, freq:'Mensual', grupo: grupo||'Servicios' });
+    renderFijos(d);
+  } else if (section === 'ahorro-aho') {
+    d.ahorro.push({ label:'Nuevo ahorro', est:0, real:0, grupo:'Ahorro' });
+    renderAhorro(d);
+  } else if (section === 'ahorro-inv') {
+    d.ahorro.push({ label:'Nueva inversión', est:0, real:0, grupo:'Inversiones' });
+    renderAhorro(d);
+  } else if (section === 'ahorro') {
+    d.ahorro.push({ label:'Nuevo ahorro', est:0, real:0, grupo: grupo||'Ahorro' });
+    renderAhorro(d);
+  } else if (section === 'vida') {
+    d.vida.push({ label:'Nuevo gasto personal', est:0, real:0, freq:'Variable', grupo:'Gastos personales' });
+    renderVida(d);
+  }
   recalcAll(d); updateDashboard();
+  saveData();
 }
 
 // ═══════════════════════════════════════════
@@ -3470,6 +3718,8 @@ function loadMetas() {
 }
 
 function updateDashboard() {
+  // Refrescar siempre el resumen anual (detalles por mes y total del año)
+  if (typeof renderDashboardAnual === 'function') { try { renderDashboardAnual(); } catch(e) {} }
   if (currentMonth < 0) return;
   const d = allData[currentMonth];
   const ingEst  = sum(d.ingresos, 'est');
@@ -3491,9 +3741,12 @@ function updateDashboard() {
   setText('d-fijos',    fmt(fijEst));
   setText('d-ahorro',   fmt(ahoEst));
   setText('d-vida',     fmt(vidEst));
-  setText('d-fijos-meta',  fmt(ingEst * metas.fijos));
-  setText('d-ahorro-meta', fmt(ingEst * metas.ahorro));
-  setText('d-vida-meta',   fmt(ingEst * metas.vida));
+  // Mostrar % real del ingreso en las cards (no la meta)
+  if (ingEst > 0) {
+    setText('d-fijos-pct-label',  Math.round(fijEst/ingEst*100) + '% del ingreso');
+    setText('d-ahorro-pct-label', Math.round(ahoEst/ingEst*100) + '% del ingreso');
+    setText('d-vida-pct-label',   Math.round(vidEst/ingEst*100) + '% del ingreso');
+  }
 
   // Meters: real vs esperado (estimado)
   updateMeter('fijos',  fijEst, fijReal, ingEst, metas.fijos);
@@ -3566,13 +3819,16 @@ function updateMeter(id, est, real, ingreso, target) {
 
 
 function updateDonut(ingEst, fijEst, ahoEst, vidEst) {
+  // Usar el ingreso como base para que los % reflejen proporción real del ingreso
+  const base  = ingEst > 0 ? ingEst : (fijEst + ahoEst + vidEst);
   const total = fijEst + ahoEst + vidEst;
-  if (total === 0) return;
-  const circ = 2 * Math.PI * 50; // 314.16
-  const fijF = (fijEst / total) * circ;
-  const ahoF = (ahoEst / total) * circ;
-  const vidF = (vidEst / total) * circ;
-  const fijPct = Math.round((fijEst / total) * 100);
+  if (base === 0) return;
+  const circ  = 2 * Math.PI * 50; // 314.16
+  // El "sobrante" (ingreso no gastado) no se pinta — el arco solo cubre lo gastado
+  const fijF  = (fijEst / base) * circ;
+  const ahoF  = (ahoEst / base) * circ;
+  const vidF  = (vidEst / base) * circ;
+  const fijPct = ingEst > 0 ? Math.round((fijEst / ingEst) * 100) : Math.round((fijEst / total) * 100);
 
   const dFij = document.getElementById('donut-fijos');
   const dAho = document.getElementById('donut-ahorro');
@@ -3588,7 +3844,12 @@ function updateDonut(ingEst, fijEst, ahoEst, vidEst) {
     dVid.setAttribute('stroke-dasharray', vidF + ' ' + circ);
     dVid.setAttribute('stroke-dashoffset', -(fijF + ahoF));
   }
-  if (dCtr) dCtr.textContent = fijPct + '%';
+  // Centro: mostrar % total del ingreso usado
+  const totalPct = ingEst > 0 ? Math.round((total / ingEst) * 100) : 100;
+  if (dCtr) dCtr.textContent = totalPct + '%';
+  // Texto del centro cambia a "gastado" o "sin asignar"
+  const dSub = document.getElementById('donut-center-sub');
+  if (dSub) dSub.textContent = ingEst > 0 && total < ingEst ? 'asignado' : 'del ingreso';
 }
 
 function updateBalanceBars(d, ingEst) {
@@ -3606,7 +3867,7 @@ function updateBalanceBars(d, ingEst) {
 
   const items = [
     { name:'Ingresos', amt: ingEst, color:'var(--accent)' },
-    { name:'Gastos Fijos', amt: fijEst, color:'var(--accent2)' },
+    { name:'Recurrentes', amt: fijEst, color:'var(--accent2)' },
     { name:'Ahorro', amt: ahoEst, color:'var(--accent)' },
     { name:'Estilo de Vida', amt: vidEst, color:'var(--accent3)' },
     { name:'Balance', amt: ingEst - gasEst, color: ingEst - gasEst >= 0 ? 'var(--accent)' : 'var(--danger)' },
@@ -3845,23 +4106,46 @@ function brCalc() {
   const abonoOn = document.getElementById('br-abono-on')?.checked;
   let abonoConfig = null;
   if (abonoOn) {
-    abonoConfig = {
-      monto:  parseFloat(document.getElementById('br-abono-monto').value)  || 0,
-      mes:    parseInt(document.getElementById('br-abono-mes').value)       || 12,
-      desde:  parseInt(document.getElementById('br-abono-desde').value)     || 1,
-      hasta:  parseInt(document.getElementById('br-abono-hasta').value)     || plazoAnios,
-    };
-    const conAbono = simularAmort(credito, tasaMes, mensual, plazoMeses, abonoConfig);
-    const mesesAhorr = base.mesesReales - conAbono.mesesReales;
-    const intAhorr   = base.totalIntereses - conAbono.totalIntereses;
+    const tipoRadio = document.querySelector('input[name="br-abono-tipo"]:checked');
+    const tipoAbono = tipoRadio ? tipoRadio.value : 'anual';
+    const capitalDisp   = parseFloat(document.getElementById('br-abono-capital')?.value)  || 0;
+    const ahorroMensual = parseFloat(document.getElementById('br-abono-mensual')?.value)  || 0;
+    const montoAnual    = parseFloat(document.getElementById('br-abono-monto')?.value)    || 0;
 
-    setText('br-abono-plazo',       (conAbono.mesesReales / 12).toFixed(1) + ' años', 'var(--accent)');
-    setText('br-abono-plazo-orig',  plazoAnios + ' años');
-    setText('br-abono-meses-ahorr', mesesAhorr + ' meses', 'var(--accent)');
-    setText('br-abono-int-ahorr',   fmt(intAhorr),           'var(--accent)');
-    setText('br-abono-total-extra', fmt(conAbono.extraAcum), 'var(--warn)');
+    let montoEfectivo = montoAnual;
+    let soloUnaVez    = false;
+    if (tipoAbono === 'capital') {
+      montoEfectivo = capitalDisp;
+      soloUnaVez    = true;
+    } else if (tipoAbono === 'mensual') {
+      montoEfectivo = ahorroMensual * 12 + montoAnual;
+    }
 
-    buildAmortTable(base.rows, conAbono.rows, true);
+    if (montoEfectivo > 0) {
+      abonoConfig = {
+        monto:      montoEfectivo,
+        mes:        parseInt(document.getElementById('br-abono-mes')?.value)    || 12,
+        desde:      parseInt(document.getElementById('br-abono-desde')?.value)  || 1,
+        hasta:      parseInt(document.getElementById('br-abono-hasta')?.value)  || plazoAnios,
+        soloUnaVez,
+      };
+    }
+
+    if (abonoConfig) {
+      const conAbono   = simularAmort(credito, tasaMes, mensual, plazoMeses, abonoConfig);
+      const mesesAhorr = base.mesesReales - conAbono.mesesReales;
+      const intAhorr   = base.totalIntereses - conAbono.totalIntereses;
+
+      setText('br-abono-plazo',       (conAbono.mesesReales / 12).toFixed(1) + ' años', 'var(--accent)');
+      setText('br-abono-plazo-orig',  plazoAnios + ' años');
+      setText('br-abono-meses-ahorr', mesesAhorr + ' meses', 'var(--accent)');
+      setText('br-abono-int-ahorr',   fmt(intAhorr),           'var(--accent)');
+      setText('br-abono-total-extra', fmt(conAbono.extraAcum), 'var(--warn)');
+
+      buildAmortTable(base.rows, conAbono.rows, true);
+    } else {
+      buildAmortTable(base.rows, null, false);
+    }
   } else {
     buildAmortTable(base.rows, null, false);
   }
@@ -3884,26 +4168,29 @@ function buildAmortTable(baseRows, abonoRows, hasAbono) {
   if (!tbody) return;
   tbody.innerHTML = '';
 
+  // Con abonos: la tabla muestra el ESCENARIO REAL (abonoRows) — capital, interés y saldos reales,
+  // terminando cuando se liquida el crédito. Se agrega "Saldo sin abono" (baseRows) para comparar.
+  const rows = (hasAbono && abonoRows) ? abonoRows : baseRows;
+  const baseMap = {};
+  baseRows.forEach(r => { baseMap[r.m] = r; });
+
   // Update thead columns
   if (thead) {
-    const abonoCol = hasAbono ? '<th>Abono extra</th>' : '';
-    const saldoAbonoCol = hasAbono ? '<th>Saldo con abono</th>' : '';
+    const abonoCol     = hasAbono ? '<th>Abono extra</th>' : '';
+    const saldoBaseCol = hasAbono ? '<th>Saldo sin abono</th>' : '';
+    const pagoHeader = brAmortView === 'anual' ? 'Pago anual' : 'Pago mensual';
     thead.innerHTML = `<tr>
       <th style="text-align:center">Periodo</th>
-      <th>Pago mensual</th>
+      <th>${pagoHeader}</th>
       <th>Capital</th>
       <th>Interés</th>
       ${abonoCol}
       <th>Saldo restante</th>
-      ${saldoAbonoCol}
+      ${saldoBaseCol}
       <th>Capital acum.</th>
       <th>Interés acum.</th>
     </tr>`;
   }
-
-  const rows = baseRows;
-  const aMap = {}; // month -> abonoRow
-  if (abonoRows) abonoRows.forEach(r => { aMap[r.m] = r; });
 
   if (brAmortView === 'anual') {
     // Group by year
@@ -3911,15 +4198,16 @@ function buildAmortTable(baseRows, abonoRows, hasAbono) {
     for (let yr = 1; yr <= maxAnio; yr++) {
       const yrRows = rows.filter(r => r.anio === yr);
       if (!yrRows.length) continue;
-      const yrCap   = yrRows.reduce((s,r) => s+r.cap, 0);
+      // Capital del año incluye el capital de los pagos + abonos extra (todo reduce el saldo)
+      const yrExtra = yrRows.reduce((s,r) => s+(r.abonoExtra||0), 0);
+      const yrCap   = yrRows.reduce((s,r) => s+r.cap, 0) + (hasAbono ? yrExtra : 0);
       const yrInt   = yrRows.reduce((s,r) => s+r.interes, 0);
       const yrPago  = yrRows.reduce((s,r) => s+r.mensual, 0);
-      const yrExtra = yrRows.reduce((s,r) => s+(r.abonoExtra||0), 0);
       const last    = yrRows[yrRows.length-1];
-      const aLast   = abonoRows ? aMap[last.m] : null;
+      const bLast   = baseMap[last.m];
 
-      const abonoTd  = hasAbono ? `<td style="color:var(--accent)">${yrExtra > 0 ? fmt(yrExtra) : '—'}</td>` : '';
-      const saldoATd = hasAbono ? `<td style="color:var(--accent2)">${aLast ? fmt(aLast.saldo) : '—'}</td>` : '';
+      const abonoTd     = hasAbono ? `<td style="color:var(--accent)">${yrExtra > 0 ? fmt(yrExtra) : '—'}</td>` : '';
+      const saldoBaseTd = hasAbono ? `<td style="color:var(--muted)">${bLast ? fmt(bLast.saldo) : '—'}</td>` : '';
 
       const tr = document.createElement('tr');
       tr.className = 'year-row';
@@ -3929,11 +4217,20 @@ function buildAmortTable(baseRows, abonoRows, hasAbono) {
         <td style="color:var(--accent)">${fmt(yrCap)}</td>
         <td style="color:var(--danger)">${fmt(yrInt)}</td>
         ${abonoTd}
-        <td>${fmt(last.saldo)}</td>
-        ${saldoATd}
+        <td style="${hasAbono?'color:var(--accent2);font-weight:600':''}">${fmt(last.saldo)}</td>
+        ${saldoBaseTd}
         <td>${fmt(last.capAcum)}</td>
         <td>${fmt(last.intAcum)}</td>
       `;
+      tbody.appendChild(tr);
+    }
+    // Fila de liquidación anticipada
+    if (hasAbono && abonoRows && baseRows.length > abonoRows.length) {
+      const mesesAhorrados = baseRows.length - abonoRows.length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td colspan="9" style="text-align:center;color:var(--accent);font-family:var(--sans);font-weight:600;padding:10px">
+        🎉 Crédito liquidado ${mesesAhorrados} meses antes (${(mesesAhorrados/12).toFixed(1)} años de ahorro)
+      </td>`;
       tbody.appendChild(tr);
     }
   } else {
@@ -3947,18 +4244,18 @@ function buildAmortTable(baseRows, abonoRows, hasAbono) {
         tbody.appendChild(tr);
         return;
       }
-      const ar = abonoRows ? aMap[r.m] : null;
-      const abonoTd  = hasAbono ? `<td style="color:var(--accent)">${r.abonoExtra > 0 ? fmt(r.abonoExtra) : '—'}</td>` : '';
-      const saldoATd = hasAbono ? `<td style="color:var(--accent2)">${ar ? fmt(ar.saldo) : '—'}</td>` : '';
+      const bRow = baseMap[r.m];
+      const abonoTd     = hasAbono ? `<td style="color:var(--accent)">${r.abonoExtra > 0 ? fmt(r.abonoExtra) : '—'}</td>` : '';
+      const saldoBaseTd = hasAbono ? `<td style="color:var(--muted)">${bRow ? fmt(bRow.saldo) : '—'}</td>` : '';
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>Mes ${r.m}</td>
         <td>${fmt(r.mensual)}</td>
-        <td style="color:var(--accent)">${fmt(r.cap)}</td>
+        <td style="color:var(--accent)">${fmt(r.cap + (hasAbono ? (r.abonoExtra||0) : 0))}</td>
         <td style="color:var(--danger)">${fmt(r.interes)}</td>
         ${abonoTd}
-        <td>${fmt(r.saldo)}</td>
-        ${saldoATd}
+        <td style="${hasAbono?'color:var(--accent2)':''}">${fmt(r.saldo)}</td>
+        ${saldoBaseTd}
         <td>${fmt(r.capAcum)}</td>
         <td>${fmt(r.intAcum)}</td>
       `;
@@ -3970,6 +4267,64 @@ function buildAmortTable(baseRows, abonoRows, hasAbono) {
 function toggleAmortView(view) {
   brAmortView = view;
   brCalc();
+}
+
+function imprimirTablaAmortizacion() {
+  const thead = document.getElementById('amort-thead');
+  const tbody = document.getElementById('amort-tbody');
+  if (!thead || !tbody) return;
+  
+  // Get values from inputs
+  const valor = parseFloat(document.getElementById('br-valor').value) || 0;
+  const engPct = parseFloat(document.getElementById('br-enganche-pct').value) || 20;
+  const tasa = parseFloat(document.getElementById('br-tasa').value) || 10.5;
+  const plazo = parseInt(document.getElementById('br-plazo').value) || 20;
+  
+  // Create HTML for print
+  const printHTML = `
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Tabla de Amortización</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { font-size: 24px; margin-bottom: 5px; }
+        .info { font-size: 12px; color: #666; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #2563EB; color: white; padding: 8px; text-align: left; font-weight: bold; font-size: 12px; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .accent { color: #16A34A; }
+        .danger { color: #DC2626; }
+        .number { font-family: 'Courier New', monospace; text-align: right; }
+      </style>
+    </head>
+    <body>
+      <h1>📅 Tabla de Amortización de Hipoteca</h1>
+      <div class="info">
+        <strong>Valor de propiedad:</strong> $${new Intl.NumberFormat('es-MX').format(Math.round(valor))} | 
+        <strong>Enganche:</strong> ${engPct}% | 
+        <strong>Tasa:</strong> ${tasa}% anual | 
+        <strong>Plazo:</strong> ${plazo} años | 
+        <strong>Vista:</strong> ${brAmortView === 'anual' ? 'Anual' : 'Mensual'} | 
+        <strong>Fecha:</strong> ${new Date().toLocaleDateString('es-MX')}
+      </div>
+      <table>
+        ${thead.innerHTML}
+        ${tbody.innerHTML}
+      </table>
+      <div style="margin-top: 20px; font-size: 10px; color: #999;">
+        Generado con Finance Studio MX - ${new Date().toLocaleString('es-MX')}
+      </div>
+    </body>
+    </html>
+  `;
+  
+  // Open print dialog
+  const printWindow = window.open('', '', 'width=800,height=600');
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
+  printWindow.print();
 }
 
 // ── BANK GRID ──
@@ -4075,6 +4430,30 @@ function deleteProp(i) {
   showToast('🗑 Propiedad eliminada');
 }
 
+// ── Simulador → Mis propiedades ──
+// Guarda la simulación actual (valor, crédito, tasa, plazo) como propiedad.
+// Desde Mis propiedades se puede enviar el pago mensual al presupuesto.
+function simuladorAPropiedades() {
+  const valor  = parseFloat(document.getElementById('br-valor')?.value) || 0;
+  const engPct = parseFloat(document.getElementById('br-enganche-pct')?.value) || 20;
+  const tasa   = parseFloat(document.getElementById('br-tasa')?.value) || 10.5;
+  const plazo  = parseInt(document.getElementById('br-plazo')?.value) || 20;
+  if (valor <= 0) { showToast('⚠️ Ingresa el valor de la propiedad'); return; }
+  const credito = valor - (valor * engPct / 100);
+  const nombre = prompt('Nombre de la propiedad:', 'Propiedad simulada') || 'Propiedad simulada';
+  myProps.push({
+    nombre,
+    valor,
+    credito: Math.round(credito),
+    tasa,
+    plazo,
+    fecha: new Date().toISOString().split('T')[0],
+  });
+  localStorage.setItem('fsProps', JSON.stringify(myProps));
+  renderProps();
+  showToast('🏠 Simulación guardada en Mis propiedades');
+}
+
 function renderProps() {
   const cont = document.getElementById('props-list');
   if (!cont) return;
@@ -4159,11 +4538,11 @@ function confirmAddPres() {
   const d        = allData[currentMonth];
 
   if (seccion === 'ahorro') {
-    d.ahorro.push({ label: concepto, est: monto, real: 0 });
+    d.ahorro.push({ label: concepto, est: monto, real: 0, grupo: 'Inversiones' });
   } else if (seccion === 'fijos') {
-    d.fijosNoi.push({ label: concepto, est: monto, real: 0, freq: 'Mensual' });
+    d.fijosNoi.push({ label: concepto, est: monto, real: 0, freq: 'Mensual', grupo: 'Compromisos' });
   } else if (seccion === 'vida') {
-    d.vida.push({ label: concepto, est: monto, real: 0, freq: 'Variable' });
+    d.vida.push({ label: concepto, est: monto, real: 0, freq: 'Variable', grupo: 'Gastos personales' });
   } else if (seccion === 'ingresos') {
     d.ingresos.push({ label: concepto, est: monto, real: 0 });
   }
@@ -4180,21 +4559,68 @@ function addBrToPresupuesto() {
   const mensualTotal = parseFloat(
     document.getElementById('br-mensual-total')?.textContent?.replace(/[^0-9.]/g,'')
   ) || 0;
-  const valor = parseFloat(document.getElementById('br-valor')?.value) || 0;
-  const concepto = valor > 0 ? `Hipoteca / crédito $${Math.round(valor).toLocaleString('es-MX')}` : 'Hipoteca / crédito';
-  openAddPresMod(concepto, Math.round(mensualTotal), 'fijos');
+  const valor    = parseFloat(document.getElementById('br-valor')?.value) || 0;
+  const concepto = valor > 0
+    ? `Hipoteca $${Math.round(valor/1000)}k`
+    : 'Hipoteca / crédito';
+  // Agregar directo a Vivienda (fijosInd) en el mes actual
+  if (currentMonth < 0) currentMonth = new Date().getMonth();
+  const d = allData[currentMonth];
+  // Evitar duplicados
+  const existe = d.fijosInd.find(r => r.label === concepto);
+  if (existe) {
+    showToast('Ya existe en Vivienda — actualiza el monto directamente');
+    return;
+  }
+  d.fijosInd.push({ label: concepto, est: Math.round(mensualTotal), real: 0, freq: 'Mensual', grupo: 'Vivienda' });
+  saveData();
+  renderPresupuesto();
+  showToast('✅ Hipoteca agregada a Vivienda en ' + MONTHS[currentMonth]);
 }
 
 function addRetToPresupuesto() {
   const afore    = document.getElementById('ret-afore')?.value || '';
   const af       = AFORES.find(a => a.id === afore);
   const aportTxt = document.getElementById('ret-aport-oblig')?.textContent || '';
-  const monto    = parseFloat(aportTxt.replace(/[^0-9.]/g,'')) || 0;
+  const obligatorio = parseFloat(aportTxt.replace(/[^0-9.]/g,'')) || 0;
   const volOn    = document.getElementById('ret-vol-on')?.checked;
   const volMes   = volOn ? (parseFloat(document.getElementById('ret-vol-mensual')?.value) || 0) : 0;
-  const total    = monto + volMes;
-  const nombre   = af ? `AFORE ${af.name}` : 'Ahorro para retiro';
-  openAddPresMod(nombre + (volOn ? ' + voluntario' : ''), Math.round(total), 'ahorro');
+  const nombreAf = af ? `AFORE ${af.name}` : 'Ahorro AFORE';
+
+  if (currentMonth < 0) currentMonth = new Date().getMonth();
+  const d = allData[currentMonth];
+  let agregados = 0;
+
+  // Agregar aportación obligatoria al PPR (actualizar si ya existe)
+  if (obligatorio > 0) {
+    const existePPR = d.ahorro.find(r => r.label === nombreAf || r.label.startsWith('AFORE'));
+    if (existePPR) {
+      existePPR.est = Math.round(obligatorio);
+    } else {
+      d.ahorro.push({ label: nombreAf, est: Math.round(obligatorio), real: 0, grupo: 'Ahorro' });
+    }
+    agregados++;
+  }
+
+  // Agregar ahorro voluntario como inversión si está activado
+  if (volOn && volMes > 0) {
+    const nombreVol = `${nombreAf} — voluntario`;
+    const existeVol = d.ahorro.find(r => r.label === nombreVol);
+    if (existeVol) {
+      existeVol.est = Math.round(volMes);
+    } else {
+      d.ahorro.push({ label: nombreVol, est: Math.round(volMes), real: 0, grupo: 'Ahorro' });
+    }
+    agregados++;
+  }
+
+  if (agregados === 0) {
+    showToast('⚠️ Configura tu AFORE y aportación primero');
+    return;
+  }
+  saveData();
+  renderPresupuesto();
+  showToast('✅ AFORE agregada a Ahorro en ' + MONTHS[currentMonth]);
 }
 
 
@@ -4234,7 +4660,54 @@ function onAforeChange() {
 function toggleRetVol(on) {
   document.getElementById('ret-vol-fields').style.display = on ? 'block' : 'none';
   document.getElementById('ret-vol-off').style.display   = on ? 'none'  : 'block';
+  // Fecha de inicio por defecto: mes actual
+  const iniInp = document.getElementById('ret-vol-ini');
+  if (on && iniInp && !iniInp.value) {
+    const hoy = new Date();
+    iniInp.value = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0');
+  }
   retCalc();
+}
+
+// ── Retiro → Presupuesto (agrega directamente, sin modal) ──
+// La aportación voluntaria mensual se agrega a Ahorro en los meses del año
+// cubiertos por el rango de fechas de inicio/término.
+function retiroAPresupuesto() {
+  const volMensual = parseFloat(document.getElementById('ret-vol-mensual')?.value) || 0;
+  if (volMensual <= 0) { showToast('⚠️ Ingresa una aportación mensual mayor a $0'); return; }
+  const aforeEl  = document.getElementById('ret-afore');
+  const aforeNom = aforeEl ? (aforeEl.options[aforeEl.selectedIndex]?.text || 'AFORE') : 'AFORE';
+  const label    = 'Aportación voluntaria ' + aforeNom;
+
+  // Rango de meses del año actual del presupuesto (YEAR)
+  const iniStr = document.getElementById('ret-vol-ini')?.value || '';
+  const finStr = document.getElementById('ret-vol-fin')?.value || '';
+  let mesIni = 0, mesFin = 11;
+  if (iniStr) {
+    const [y, m] = iniStr.split('-').map(Number);
+    if (y >  YEAR) { showToast('⚠️ La aportación inicia después de ' + YEAR + ' — no aplica a este presupuesto'); return; }
+    if (y === YEAR) mesIni = m - 1;
+  }
+  if (finStr) {
+    const [y, m] = finStr.split('-').map(Number);
+    if (y <  YEAR) { showToast('⚠️ La aportación termina antes de ' + YEAR); return; }
+    if (y === YEAR) mesFin = m - 1;
+  }
+
+  let agregados = 0;
+  for (let mm = mesIni; mm <= mesFin; mm++) {
+    const d = allData[mm];
+    if (!d) continue;
+    if ((d.ahorro||[]).some(r => r.label === label)) continue; // evitar duplicados
+    d.ahorro.push({ label, est: Math.round(volMensual), real: 0, grupo: 'Ahorro' });
+    agregados++;
+  }
+  saveData();
+  renderPresupuesto();
+  updateDashboard();
+  showToast(agregados > 0
+    ? '✅ ' + label + ' agregada a Ahorro en ' + agregados + ' mes' + (agregados>1?'es':'') + ' de ' + YEAR
+    : 'ℹ️ Ya estaba agregada en esos meses');
 }
 
 // ── PROYECCIÓN PRINCIPAL ──
@@ -4249,7 +4722,12 @@ function retCalc() {
   const volOn      = document.getElementById('ret-vol-on')?.checked;
   const volMensual = parseFloat(document.getElementById('ret-vol-mensual')?.value) || 0;
   const volAnual   = parseFloat(document.getElementById('ret-vol-anual')?.value)   || 0;
-  const volDesde   = parseInt(document.getElementById('ret-vol-desde')?.value)     || 1;
+  // Rango de aportación voluntaria por fechas (puede abarcar varios años)
+  const volIniStr  = document.getElementById('ret-vol-ini')?.value || '';
+  const volFinStr  = document.getElementById('ret-vol-fin')?.value || '';
+  const anioActual = new Date().getFullYear();
+  const volDesde   = volIniStr ? Math.max(1, parseInt(volIniStr.split('-')[0]) - anioActual + 1) : 1;
+  const volHasta   = volFinStr ? Math.max(volDesde, parseInt(volFinStr.split('-')[0]) - anioActual + 1) : 9999;
   const isrPct     = parseFloat(document.getElementById('ret-isr-ded')?.value)     || 30;
 
   const anios    = Math.max(edadRet - edad, 1);
@@ -4266,8 +4744,9 @@ function retCalc() {
   for (let yr = 1; yr <= anios; yr++) {
     // Monthly compounding this year
     const aportMes    = salActual * aportObligPct;
-    const volMes      = (volOn && yr >= volDesde) ? volMensual : 0;
-    const volExtra    = (volOn && yr >= volDesde) ? volAnual   : 0;
+    const enRangoVol  = volOn && yr >= volDesde && yr <= volHasta;
+    const volMes      = enRangoVol ? volMensual : 0;
+    const volExtra    = enRangoVol ? volAnual   : 0;
 
     for (let m = 1; m <= 12; m++) {
       // AFORE obligatorio
@@ -4282,13 +4761,13 @@ function retCalc() {
 
     totalOblig  += aportMes * 12;
     totalVolAport += (volMes * 12 + volExtra);
-    if (volOn && yr >= volDesde) {
+    if (enRangoVol) {
       totalIsrDev += (volMes * 12 + volExtra) * (isrPct / 100);
     }
 
     if (yr % 5 === 0 || yr === anios || yr === 1) {
       tabla.push({ yr, edad: edad + yr, saldo: Math.round(saldo), saldoVol: Math.round(saldoVol),
-                   aportAnual: Math.round(aportMes * 12 + (volOn && yr >= volDesde ? volMes*12+volExtra : 0)) });
+                   aportAnual: Math.round(aportMes * 12 + (enRangoVol ? volMes*12+volExtra : 0)) });
     }
     salActual *= (1 + crecSal / 100);
   }
@@ -4652,14 +5131,21 @@ function calcMulti() {
     const reinv        = row.reinv;
     const rM           = tasa / 100 / 12;
     // Simular mes a mes: saldo crece con aportaciones + interés
+    // Compuesto: las ganancias se reinvierten. Simple: interés sobre el principal aportado, sin reinvertir ganancias.
     let saldo = capitalIni;
+    let principal = capitalIni, gains = 0;
     for (let m = 0; m < meses; m++) {
-      if (reinv) saldo = saldo * (1 + rM) + aportMensual;
-      else       saldo = saldo + capitalIni * rM + aportMensual;
+      if (reinv) {
+        saldo = saldo * (1 + rM) + aportMensual;
+      } else {
+        gains    += principal * rM;
+        principal += aportMensual;
+      }
     }
+    if (!reinv) saldo = principal + gains;
     const totalAportado = capitalIni + aportMensual * meses;
     const ganancia      = Math.max(0, saldo - totalAportado);
-    const mensualGan    = meses > 0 ? ganancia / meses : 0;
+    const mensualGan    = meses > 0 ? Math.max(0, ganancia) / meses : aportMensual * (tasa/100/12);
     const nombre        = row.nombre || p?.name || 'Inversión';
     return { p, nombre, tasa, capitalIni, aportMensual, monto: totalAportado, meses, reinv, ganancia, mensualGan, total: saldo, ini: row.ini, fin: row.fin };
   });
@@ -4696,7 +5182,7 @@ function calcMulti() {
         <td style="color:var(--muted);font-size:11px">${r.ini||'—'} → ${r.fin||'—'}</td>
         <td style="color:var(--muted)">${r.meses}</td>
         <td style="color:var(--muted);font-size:11px">${r.reinv?'Compuesto':'Simple'}</td>
-        <td style="color:var(--accent2)">${fmt(r.mensual)}</td>
+        <td style="color:var(--accent2)">${fmt(r.mensualGan)}</td>
         <td style="color:var(--accent);font-weight:600">${fmt(r.ganancia)}</td>
         <td>${fmt(r.total)}</td>
       </tr>
@@ -4748,10 +5234,16 @@ function calcMulti() {
       if (mesesM <= 0) return { gan: 0, saldo: 0 };
       const rM2 = r.tasa / 100 / 12;
       let saldo = r.capitalIni;
+      let principal2 = r.capitalIni, gains2 = 0;
       for (let m = 0; m < mesesM; m++) {
-        if (r.reinv) saldo = saldo * (1 + rM2) + r.aportMensual;
-        else         saldo = saldo + r.capitalIni * rM2 + r.aportMensual;
+        if (r.reinv) {
+          saldo = saldo * (1 + rM2) + r.aportMensual;
+        } else {
+          gains2     += principal2 * rM2;
+          principal2 += r.aportMensual;
+        }
       }
+      if (!r.reinv) saldo = principal2 + gains2;
       const aportado = r.capitalIni + r.aportMensual * mesesM;
       return { gan: saldo - aportado, saldo };
     });
@@ -4767,13 +5259,6 @@ function calcMulti() {
   }).join('');
 }
 
-// Mantener calcRendimiento como stub para no romper referencias
-function calcRendimiento() { calcMulti(); }
-function updateCalcRate() {}
-function syncMonto() {}
-function updateSlider() {}
-function buildTimeline() {}
-function updateMultiCompare() {}
 
 
 // ═══════════════════════════════════════════
@@ -5508,14 +5993,14 @@ function renderPortafolio() {
         <div class="port-logo" style="background:${p.bg};color:${p.color};opacity:${activo?1:0.6}">${p.emoji}</div>
         <div>
           <div class="port-name" style="display:flex;align-items:center;gap:6px">${p.name} ${estadoBadge}</div>
-          <div class="port-type">${periodoText}</div>
+          <div class="port-type">${periodoText}${inv.aportMensual > 0 ? ' · Aporta ' + fmt(inv.aportMensual) + '/mes' : ''}</div>
         </div>
         <div class="port-val" style="opacity:${activo?1:0.6}">${fmt(monto)}</div>
         <div class="port-gain" style="color:${vencido?'var(--muted)':'var(--accent)'}">+${fmt(ganAcum)}</div>
         <div class="port-rate" style="opacity:${activo?1:0.6}">${tasa}%</div>
         <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end">
-          ${activo ? `<button class="btn-add-pres" style="font-size:10px;padding:3px 8px" onclick="openAddPresMod('${esc(p.name)}','${Math.round(inv.monto*(inv.tasa||p.rate)/100/12)}','ahorro')">→ Pres.</button>` : ''}
-          <button class="del-btn" onclick="deleteInversion(${i})">🗑</button>
+          ${activo ? `<button class="btn-add-pres" style="font-size:10px;padding:3px 8px" onclick="portafolioAPresupuesto(${i})">→ Pres.</button>` : ''}
+          <button class="del-btn port-del" title="Eliminar inversión" onclick="deleteInversion(${i})">🗑</button>
         </div>
       </div>
     `;
@@ -5599,6 +6084,70 @@ function deleteInversion(i) {
   showToast('🗑 Inversión eliminada');
 }
 
+// ── Portafolio → Presupuesto (agrega directamente, sin modal) ──
+// Aportación mensual → Ahorro e Inversión (grupo Inversiones)
+// Ganancia mensual estimada → Ingresos
+// Se agrega en cada mes del año cubierto por la inversión.
+function portafolioAPresupuesto(i) {
+  const inv = myPortafolio[i];
+  if (!inv) return;
+  const p = PLATFORMS.find(x => x.id === inv.platId) || { name: inv._nombre || inv.platId, rate: 0 };
+  const nombre = inv._nombre || p.name;
+  const tasa   = inv.tasa || p.rate || 0;
+  const rM     = tasa / 100 / 12;
+
+  // Rango de meses del año actual cubiertos por la inversión
+  const hoy      = new Date();
+  const iniDate  = inv.fecha    ? new Date(inv.fecha)    : hoy;
+  const finDate  = inv.fechaFin ? new Date(inv.fechaFin) : null;
+  let mesIni = 0, mesFin = 11;
+  if (iniDate.getFullYear() >  YEAR) { showToast('⚠️ La inversión inicia después de ' + YEAR); return; }
+  if (iniDate.getFullYear() === YEAR) mesIni = iniDate.getMonth();
+  if (finDate) {
+    if (finDate.getFullYear() <  YEAR) { showToast('⚠️ La inversión venció antes de ' + YEAR); return; }
+    if (finDate.getFullYear() === YEAR) mesFin = finDate.getMonth();
+  }
+
+  // Ganancia mensual: promedio simulado (respeta compuesto/simple y aportaciones)
+  let ganMensual = 0;
+  const capIni = inv.capitalIni != null ? inv.capitalIni : (inv.monto || 0);
+  const aportM = inv.aportMensual || 0;
+  const reinv  = inv.reinv !== false;
+  const mesesTot = finDate ? Math.max(1, Math.round((finDate - iniDate) / (1000*60*60*24*30.4))) : 12;
+  let saldoS = capIni, prinS = capIni, gainS = 0;
+  for (let m = 0; m < mesesTot; m++) {
+    if (reinv) { saldoS = saldoS * (1 + rM) + aportM; }
+    else       { gainS += prinS * rM; prinS += aportM; }
+  }
+  const ganTotal = reinv ? Math.max(0, saldoS - (capIni + aportM * mesesTot)) : gainS;
+  ganMensual = ganTotal / mesesTot;
+
+  let mesesAgregados = 0;
+  for (let m = mesIni; m <= mesFin; m++) {
+    const d = allData[m];
+    if (!d) continue;
+    // Aportación mensual → Ahorro e Inversión (grupo Inversiones), evitando duplicados
+    if (aportM > 0 && !(d.ahorro||[]).some(r => r.label === nombre)) {
+      d.ahorro.push({ label: nombre, est: Math.round(aportM), real: 0, grupo: 'Inversiones' });
+    }
+    // Ganancia mensual → Ingresos, evitando duplicados
+    const labelGan = nombre + ' — ganancia';
+    if (ganMensual > 0 && !(d.ingresos||[]).some(r => r.label === labelGan)) {
+      d.ingresos.push({ label: labelGan, est: Math.round(ganMensual), real: 0 });
+    }
+    mesesAgregados++;
+  }
+
+  saveData();
+  renderPresupuesto();
+  updateDashboard();
+  if (aportM > 0) {
+    showToast('✅ ' + nombre + ': aportación → Ahorro e Inversión, ganancia → Ingresos (' + mesesAgregados + ' meses)');
+  } else {
+    showToast('✅ ' + nombre + ': ganancia mensual → Ingresos (' + mesesAgregados + ' meses)');
+  }
+}
+
 // ── TAB SWITCH ──
 function showInvPanel(id, btn) {
   document.querySelectorAll('.inv-panel').forEach(p => p.classList.remove('active'));
@@ -5624,19 +6173,26 @@ function guardarCarteraEnPortafolio() {
     if ((!row.capitalIni || row.capitalIni <= 0) && (!row.aportMensual || row.aportMensual <= 0)) return;
     const p = PLATFORMS.find(x => x.id === row.platId);
     const platId = p ? row.platId : 'custom';
+    const meses  = mesesEntre(row.ini, row.fin);
+    // Monto = total aportado en el periodo (capital inicial + aportaciones mensuales)
+    const montoTotal = (row.capitalIni || 0) + (row.aportMensual || 0) * meses;
     myPortafolio.push({
       platId,
-      monto:    row.capitalIni || 0,
-      tasa:     row.tasa || (p ? p.rate : 0),
-      fecha:    row.ini ? row.ini + '-01' : new Date().toISOString().split('T')[0],
-      fechaFin: row.fin ? row.fin + '-01' : '',
+      monto:        montoTotal,
+      capitalIni:   row.capitalIni || 0,
+      aportMensual: row.aportMensual || 0,
+      reinv:        row.reinv !== false,
+      tasa:         row.tasa || (p ? p.rate : 0),
+      fecha:        row.ini ? row.ini + '-01' : new Date().toISOString().split('T')[0],
+      fechaFin:     row.fin ? row.fin + '-01' : '',
       // Guardar nombre personalizado si es custom
-      _nombre:  row.nombre || (p ? p.name : 'Inversión'),
+      _nombre:      row.nombre || (p ? p.name : 'Inversión'),
     });
     agregadas++;
   });
   if (agregadas === 0) { showToast('⚠️ Ingresa al menos un monto mayor a $0'); return; }
   try { localStorage.setItem('fsPortafolio', JSON.stringify(myPortafolio)); } catch(e) {}
+  renderPortafolio();
   showToast('💼 ' + agregadas + ' inversión' + (agregadas>1?'es':'') + ' agregada' + (agregadas>1?'s':'') + ' al portafolio');
 }
 
@@ -5853,7 +6409,7 @@ function exportarExcel() {
   wsR['!merges'].push({ s:{r:1,c:0}, e:{r:1,c:7} });
 
   // Columnas del resumen
-  const colHeaders = ['Mes','Ingresos','Gastos Fijos','Ahorro','Estilo de Vida','Gastos Totales','Balance','% Ahorro'];
+  const colHeaders = ['Mes','Ingresos','Recurrentes','Ahorro','Estilo de Vida','Gastos Totales','Balance','% Ahorro'];
   colHeaders.forEach((h, c) => {
     setCell(wsR, 3, c, h, { fill: xlFill(XL.textDark), font: xlFont(true, XL.white, 9), align: xlAlign('center'), border: xlBorder() });
   });
@@ -5956,7 +6512,7 @@ function exportarExcel() {
     escribirSeccion('💵 INGRESOS', d.ingresos, '166534', XL.greenBg,
       ['Concepto','Estimado ($)','Real ($)','Diferencia',''], ingEst, ingReal);
 
-    // Gastos fijos
+    // Recurrentes
     const fijEst  = sumM(d.fijosInd,'est')+sumM(d.fijosNoi,'est');
     const fijReal = sumM(d.fijosInd,'real')+sumM(d.fijosNoi,'real');
     escribirSeccion('🏠 GASTOS FIJOS (50%)', [...d.fijosInd,...d.fijosNoi], '1E3A8A', XL.blueBg,
